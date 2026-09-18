@@ -6,6 +6,7 @@
 <title>StockSight — Fact-Based Stock Intelligence</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked@13.0.2/marked.min.js"></script>
 <style>
 /* ═══════════════════════════════════════════════════════════════
    CSS VARIABLES & RESET
@@ -344,11 +345,14 @@ input,textarea{font-family:var(--font);outline:none}
   border-radius:var(--radius);padding:20px;
   font-size:.92rem;line-height:1.7;color:var(--text-secondary);
 }
-.rumor-result h1,.rumor-result h2,.rumor-result h3,.rumor-result h4{color:var(--text-primary);margin:16px 0 8px;font-size:1rem}
-.rumor-result h1:first-child,.rumor-result h2:first-child,.rumor-result h3:first-child{margin-top:0}
-.rumor-result strong{color:var(--text-primary)}
-.rumor-result ul,.rumor-result ol{padding-left:20px;margin:8px 0}
-.rumor-result li{margin-bottom:4px}
+.rumor-result blockquote, .verdict-box blockquote, .chat-msg blockquote{
+  border-left:3px solid var(--accent);background:var(--bg-primary);padding:10px 14px;
+  margin:12px 0;border-radius:0 var(--radius-sm) var(--radius-sm) 0;color:var(--text-secondary);
+}
+.rumor-result a, .verdict-box a, .chat-msg a{
+  color:var(--accent);text-decoration:underline;text-underline-offset:3px;
+}
+.rumor-result a:hover, .verdict-box a:hover, .chat-msg a:hover{color:#60a5fa}
 
 /* ═══════════════════════════════════════════════════════════════
    CHAT MODE
@@ -1373,36 +1377,29 @@ function timeAgo(dateStr) {
   return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
 }
 
-// Simple markdown → HTML converter
+// Robust markdown renderer using marked.js
 function markdownToHTML(md) {
   if (!md) return '';
+  try {
+    if (typeof marked !== 'undefined' && marked.parse) {
+      return marked.parse(md, { gfm: true, breaks: true });
+    }
+  } catch (e) {
+    console.warn('marked.parse error:', e);
+  }
+
+  // Fallback if marked is loading
   let html = md
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    // Headers
     .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
     .replace(/^### (.+)$/gm, '<h3>$1</h3>')
     .replace(/^## (.+)$/gm, '<h2>$1</h2>')
     .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-    // Bold & italic
-    .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    // Code
-    .replace(/`([^`]+)`/g, '<code>$1</code>')
-    // Unordered lists
-    .replace(/^\* (.+)$/gm, '<li>$1</li>')
-    .replace(/^- (.+)$/gm, '<li>$1</li>')
-    // Ordered lists
-    .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
-    // Horizontal rules
-    .replace(/^---$/gm, '<hr>')
-    // Line breaks
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+    .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
     .replace(/\n\n/g, '</p><p>')
     .replace(/\n/g, '<br>');
-
-  // Wrap consecutive <li> in <ul>
-  html = html.replace(/(<li>.*?<\/li>(?:<br>)?)+/gs, match => '<ul>' + match.replace(/<br>/g, '') + '</ul>');
-
   return '<p>' + html + '</p>';
 }
 </script>
