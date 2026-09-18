@@ -184,12 +184,15 @@ function processStockData(s, chart5y, chart3m, ticker) {
   const balanceSheets = (s.balanceSheetHistory?.balanceSheetStatements || []).map(bs => {
     const ltDebt = raw(bs.longTermDebt) || 0;
     const stDebt = raw(bs.shortLongTermDebt) || 0;
+    const cash = raw(bs.cash) || 0;
+    const totalDebt = (ltDebt + stDebt) > 0 ? (ltDebt + stDebt) : (raw(bs.totalDebt) || 0);
     return {
       date: bs.endDate ? (typeof bs.endDate === 'object' ? bs.endDate.fmt : bs.endDate) : null,
       totalAssets: raw(bs.totalAssets),
-      totalDebt: (ltDebt + stDebt) > 0 ? (ltDebt + stDebt) : raw(bs.totalDebt),
+      totalDebt,
       totalEquity: raw(bs.totalStockholderEquity),
-      cash: raw(bs.cash)
+      cash,
+      netCash: cash - totalDebt
     };
   }).reverse();
 
@@ -250,6 +253,27 @@ function processStockData(s, chart5y, chart3m, ticker) {
     if (avgVolume > 0) volumeSpike = recentAvg / avgVolume;
   }
 
+  // ── Prior Price Run-Up Computation (5d, 15d, 30d) ──
+  let priceChange5d = null;
+  let priceChange15d = null;
+  let priceChange30d = null;
+
+  if (recentVolume.length >= 6) {
+    const cur = recentVolume[recentVolume.length - 1].close;
+    const p5 = recentVolume[recentVolume.length - 6].close;
+    if (cur && p5) priceChange5d = ((cur - p5) / p5) * 100;
+  }
+  if (recentVolume.length >= 16) {
+    const cur = recentVolume[recentVolume.length - 1].close;
+    const p15 = recentVolume[recentVolume.length - 16].close;
+    if (cur && p15) priceChange15d = ((cur - p15) / p15) * 100;
+  }
+  if (recentVolume.length >= 31) {
+    const cur = recentVolume[recentVolume.length - 1].close;
+    const p30 = recentVolume[recentVolume.length - 31].close;
+    if (cur && p30) priceChange30d = ((cur - p30) / p30) * 100;
+  }
+
   // ── Revenue CAGR ──
   let revenueCAGR = null;
   if (incomeStatements.length >= 2) {
@@ -280,9 +304,19 @@ function processStockData(s, chart5y, chart3m, ticker) {
   const insiderHeld = raw(mh.insidersPercentHeld);
   const instHeld = raw(mh.institutionsPercentHeld);
 
+  const cleanTicker = ticker.replace('.NS', '').replace('.BO', '');
+  const documents = {
+    bseUrl: `https://www.bseindia.com/stock-share-price/${encodeURIComponent(cleanTicker)}/`,
+    nseUrl: `https://www.nseindia.com/get-quotes/equity?symbol=${encodeURIComponent(cleanTicker)}`,
+    screenerUrl: `https://www.screener.in/company/${encodeURIComponent(cleanTicker)}/consolidated/`,
+    annualReportSearch: `https://www.google.com/search?q=${encodeURIComponent(cleanTicker + ' Annual Report filetype:pdf')}`,
+    investorPresentationSearch: `https://www.google.com/search?q=${encodeURIComponent(cleanTicker + ' Investor Presentation filetype:pdf')}`
+  };
+
   return {
     name: pr.longName || pr.shortName || ticker,
     symbol: ticker,
+    cleanTicker,
     exchange: pr.exchangeName || pr.exchange || '',
     currency: pr.currency || 'INR',
     sector: ap.sector || '',
@@ -290,6 +324,7 @@ function processStockData(s, chart5y, chart3m, ticker) {
     description: ap.longBusinessSummary || '',
     website: ap.website || '',
     employees: raw(ap.fullTimeEmployees),
+    shares,
 
     currentPrice: raw(fd.currentPrice) || raw(pr.regularMarketPrice),
     previousClose: raw(sd.previousClose) || raw(pr.regularMarketPreviousClose),
@@ -333,12 +368,16 @@ function processStockData(s, chart5y, chart3m, ticker) {
 
     avgVolume,
     volumeSpike,
+    priceChange5d,
+    priceChange15d,
+    priceChange30d,
 
     financials: {
       income: incomeStatements,
       balanceSheet: balanceSheets,
       cashFlow: cashFlows
     },
+    documents,
     priceHistory,
     recentVolume
   };

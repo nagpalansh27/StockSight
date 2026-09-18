@@ -3,22 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>StockSight — Institutional Equity Intelligence & Rumor Buster</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>">
+<title>StockSight — Institutional Equity Intelligence & Forensic Audit</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='8'/><path d='m21 21-4.3-4.3'/></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked@13.0.2/marked.min.js"></script>
 <style>
 /* ═══════════════════════════════════════════════════════════════
-   GLOBAL DESIGN TOKENS & ELEVATED ROUNDED GEOMETRY
+   GLOBAL DESIGN TOKENS & INSTITUTIONAL SLATE THEME
    ═══════════════════════════════════════════════════════════════ */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg-body:#050811;
+  --bg-body:#030712;
   --bg-primary:#09101d;
-  --bg-card:rgba(15, 23, 42, 0.72);
-  --bg-card-hover:rgba(23, 37, 65, 0.85);
-  --bg-glass:rgba(13, 21, 38, 0.65);
-  --bg-input:rgba(10, 16, 29, 0.92);
+  --bg-card:rgba(15, 23, 42, 0.75);
+  --bg-card-hover:rgba(23, 37, 65, 0.9);
+  --bg-glass:rgba(13, 21, 38, 0.7);
+  --bg-input:rgba(10, 16, 29, 0.95);
   --border:rgba(148, 163, 184, 0.14);
   --border-hover:rgba(59, 130, 246, 0.45);
   --border-focus:#3b82f6;
@@ -26,35 +26,36 @@
   --text-secondary:#94a3b8;
   --text-muted:#64748b;
   --accent:#3b82f6;
-  --accent-glow:rgba(59, 130, 246, 0.3);
+  --accent-glow:rgba(59, 130, 246, 0.28);
   --accent-hover:#2563eb;
   --green:#10b981;
-  --green-glow:rgba(16, 185, 129, 0.25);
+  --green-glow:rgba(16, 185, 129, 0.22);
   --green-dim:rgba(16, 185, 129, 0.12);
+  --green-border:rgba(16, 185, 129, 0.35);
   --red:#ef4444;
-  --red-glow:rgba(239, 68, 68, 0.25);
+  --red-glow:rgba(239, 68, 68, 0.22);
   --red-dim:rgba(239, 68, 68, 0.12);
+  --red-border:rgba(239, 68, 68, 0.35);
   --amber:#f59e0b;
-  --amber-glow:rgba(245, 158, 11, 0.25);
+  --amber-glow:rgba(245, 158, 11, 0.22);
   --amber-dim:rgba(245, 158, 11, 0.12);
-  --purple:#8b5cf6;
-  --purple-dim:rgba(139, 92, 246, 0.12);
-  --radius:20px;
-  --radius-md:14px;
-  --radius-sm:10px;
+  --amber-border:rgba(245, 158, 11, 0.35);
+  --radius:16px;
+  --radius-md:12px;
+  --radius-sm:8px;
   --radius-pill:9999px;
-  --shadow-sm:0 4px 16px rgba(0,0,0,0.35);
-  --shadow-md:0 12px 36px -8px rgba(0,0,0,0.6);
-  --shadow-glow:0 0 28px rgba(59, 130, 246, 0.18);
-  --font:system-ui,-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',Roboto,sans-serif;
-  --mono:'SF Mono',Monaco,Consolas,'Courier New',monospace;
+  --shadow-sm:0 4px 16px rgba(0,0,0,0.4);
+  --shadow-md:0 12px 36px -8px rgba(0,0,0,0.65);
+  --shadow-glow:0 0 28px rgba(59, 130, 246, 0.16);
+  --font:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',Roboto,sans-serif;
+  --mono:'SF Mono','JetBrains Mono',Monaco,Consolas,monospace;
 }
 html{font-size:15px;scroll-behavior:smooth}
 body{
   font-family:var(--font);background:var(--bg-body);color:var(--text-primary);
   min-height:100vh;line-height:1.6;overflow-x:hidden;
-  background-image:radial-gradient(circle at 50% -10%, rgba(30, 58, 138, 0.25) 0%, transparent 65%),
-                   radial-gradient(circle at 90% 40%, rgba(16, 185, 129, 0.08) 0%, transparent 50%);
+  background-image:radial-gradient(circle at 50% -10%, rgba(30, 58, 138, 0.22) 0%, transparent 65%),
+                   radial-gradient(circle at 90% 40%, rgba(16, 185, 129, 0.06) 0%, transparent 50%);
   background-attachment:fixed;
 }
 a{color:var(--accent);text-decoration:none;transition:color .15s}
@@ -74,16 +75,22 @@ input,textarea,select{font-family:var(--font);outline:none}
   min-height:100vh;padding:24px;
 }
 .pw-box{
-  background:linear-gradient(145deg, rgba(16, 26, 46, 0.85) 0%, rgba(9, 15, 27, 0.95) 100%);
+  background:linear-gradient(145deg, rgba(16, 26, 46, 0.9) 0%, rgba(9, 15, 27, 0.98) 100%);
   border:1px solid var(--border);border-radius:var(--radius);padding:44px 36px;
-  text-align:center;max-width:400px;width:100%;box-shadow:var(--shadow-md);
+  text-align:center;max-width:420px;width:100%;box-shadow:var(--shadow-md);
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
 }
+.pw-glyph{
+  width:56px;height:56px;margin:0 auto 20px;border-radius:14px;
+  background:linear-gradient(135deg, rgba(59,130,246,0.15), rgba(16,185,129,0.15));
+  border:1px solid rgba(59,130,246,0.3);display:flex;align-items:center;justify-content:center;
+  color:var(--accent);
+}
+.pw-glyph svg{width:28px;height:28px}
 .pw-box h1{
-  font-size:1.9rem;margin-bottom:8px;font-weight:800;letter-spacing:-0.5px;
+  font-size:1.85rem;margin-bottom:8px;font-weight:800;letter-spacing:-0.5px;
   background:linear-gradient(135deg, #60a5fa, #34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
 }
-.pw-box .pw-icon{font-size:3.2rem;margin-bottom:18px;display:block;filter:drop-shadow(0 0 16px rgba(59,130,246,0.35))}
 .pw-box p{color:var(--text-secondary);margin-bottom:28px;font-size:.92rem;line-height:1.5}
 .pw-box input{
   width:100%;padding:14px 18px;border-radius:var(--radius-pill);
@@ -104,24 +111,35 @@ input,textarea,select{font-family:var(--font);outline:none}
 /* ═══════════════════════════════════════════════════════════════
    MAIN APP LAYOUT
    ═══════════════════════════════════════════════════════════════ */
-#app{display:none;max-width:1240px;margin:0 auto;padding:20px 24px 80px}
+#app{display:none;max-width:1260px;margin:0 auto;padding:20px 24px 80px}
 
 /* ─── Header ─── */
 .app-header{
   display:flex;flex-wrap:wrap;align-items:center;gap:18px;
-  padding:16px 20px;margin-bottom:28px;
-  background:linear-gradient(145deg, rgba(16, 26, 46, 0.75) 0%, rgba(9, 15, 27, 0.85) 100%);
+  padding:14px 20px;margin-bottom:24px;
+  background:linear-gradient(145deg, rgba(16, 26, 46, 0.8) 0%, rgba(9, 15, 27, 0.9) 100%);
   border:1px solid var(--border);border-radius:var(--radius);
   box-shadow:var(--shadow-sm);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
 }
-.app-logo{display:flex;align-items:center;gap:12px;flex-shrink:0;cursor:pointer}
+.app-logo{display:flex;align-items:center;gap:10px;flex-shrink:0;cursor:pointer}
+.app-logo-badge{
+  width:34px;height:34px;border-radius:8px;
+  background:linear-gradient(135deg, rgba(59,130,246,0.2), rgba(16,185,129,0.2));
+  border:1px solid rgba(59,130,246,0.4);display:flex;align-items:center;justify-content:center;
+  color:#60a5fa;
+}
+.app-logo-badge svg{width:18px;height:18px}
 .app-logo h1{
-  font-size:1.45rem;font-weight:800;letter-spacing:-0.5px;
+  font-size:1.35rem;font-weight:800;letter-spacing:-0.5px;
   background:linear-gradient(135deg, #60a5fa, #34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
 }
-.app-logo span{font-size:1.6rem}
+.app-badge-tag{
+  font-size:0.68rem;font-weight:700;padding:2px 7px;border-radius:4px;
+  background:rgba(59,130,246,0.12);color:#93c5fd;border:1px solid rgba(59,130,246,0.25);
+  letter-spacing:0.5px;text-transform:uppercase;margin-left:4px;
+}
 
-/* ─── Search ─── */
+/* ─── Search Bar ─── */
 .search-wrapper{flex:1;min-width:280px;position:relative}
 .search-bar{
   display:flex;gap:0;border-radius:var(--radius-pill);overflow:hidden;
@@ -130,13 +148,13 @@ input,textarea,select{font-family:var(--font);outline:none}
 }
 .search-bar:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
 .search-bar input{
-  flex:1;padding:12px 20px;background:transparent;border:none;
-  color:var(--text-primary);font-size:.95rem;font-weight:500;
+  flex:1;padding:12px 18px;background:transparent;border:none;
+  color:var(--text-primary);font-size:.92rem;font-weight:500;
 }
 .search-bar input::placeholder{color:var(--text-muted)}
 .search-bar button{
-  padding:12px 24px;background:linear-gradient(135deg, var(--accent), var(--accent-hover));
-  color:#fff;font-weight:700;font-size:.9rem;letter-spacing:0.3px;
+  padding:12px 22px;background:linear-gradient(135deg, var(--accent), var(--accent-hover));
+  color:#fff;font-weight:700;font-size:.88rem;letter-spacing:0.3px;
   transition:all .2s;
 }
 .search-bar button:hover{background:#1d4ed8}
@@ -163,12 +181,12 @@ input,textarea,select{font-family:var(--font);outline:none}
 
 /* ─── Mode Tabs ─── */
 .mode-tabs{
-  display:flex;gap:6px;flex-shrink:0;
-  background:rgba(6, 11, 20, 0.85);border-radius:var(--radius-pill);padding:5px;
+  display:flex;gap:4px;flex-shrink:0;
+  background:rgba(6, 11, 20, 0.85);border-radius:var(--radius-pill);padding:4px;
   border:1px solid rgba(148, 163, 184, 0.1);
 }
 .mode-tab{
-  padding:8px 18px;border-radius:var(--radius-pill);font-size:.85rem;font-weight:600;
+  padding:8px 16px;border-radius:var(--radius-pill);font-size:.84rem;font-weight:600;
   color:var(--text-secondary);background:transparent;transition:all .2s ease;
   white-space:nowrap;display:flex;align-items:center;gap:6px;
 }
@@ -191,373 +209,613 @@ input,textarea,select{font-family:var(--font);outline:none}
 /* ─── Empty State ─── */
 .empty-state{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:90px 20px;text-align:center;color:var(--text-muted);
+  padding:80px 20px;text-align:center;color:var(--text-muted);
 }
-.empty-state .es-icon{font-size:4.5rem;margin-bottom:18px;opacity:.65;filter:drop-shadow(0 0 20px rgba(59,130,246,0.3))}
-.empty-state h2{font-size:1.5rem;color:var(--text-primary);margin-bottom:8px;font-weight:700}
-.empty-state p{max-width:480px;font-size:.95rem;line-height:1.6;color:var(--text-secondary)}
+.empty-state .es-glyph{
+  width:64px;height:64px;margin-bottom:18px;border-radius:18px;
+  background:linear-gradient(135deg, rgba(59,130,246,0.1), rgba(16,185,129,0.1));
+  border:1px solid rgba(59,130,246,0.25);display:flex;align-items:center;justify-content:center;
+  color:var(--accent);
+}
+.empty-state .es-glyph svg{width:32px;height:32px}
+.empty-state h2{font-size:1.45rem;color:var(--text-primary);margin-bottom:8px;font-weight:700}
+.empty-state p{max-width:500px;font-size:.92rem;line-height:1.6;color:var(--text-secondary)}
 
-/* ─── Loading ─── */
+/* ─── Loading Overlay ─── */
 .loading-overlay{
   display:none;flex-direction:column;align-items:center;justify-content:center;
   padding:90px 20px;
 }
 .loading-overlay.active{display:flex}
 .spinner{
-  width:52px;height:52px;border:4px solid rgba(148,163,184,0.15);
+  width:48px;height:48px;border:3px solid rgba(148,163,184,0.15);
   border-top-color:var(--accent);border-radius:50%;
-  animation:spin .75s linear infinite;margin-bottom:20px;
+  animation:spin .75s linear infinite;margin-bottom:18px;
   box-shadow:0 0 20px var(--accent-glow);
 }
 @keyframes spin{to{transform:rotate(360deg)}}
-.loading-text{color:var(--text-secondary);font-size:1rem;font-weight:500}
+.loading-text{color:var(--text-secondary);font-size:.95rem;font-weight:500}
 
 /* ─── Stock Info Bar ─── */
 .stock-info-bar{
-  display:flex;flex-wrap:wrap;align-items:center;gap:14px;
-  padding:18px 22px;margin-bottom:24px;
-  background:linear-gradient(145deg, rgba(16, 26, 46, 0.8) 0%, rgba(9, 15, 27, 0.9) 100%);
+  display:flex;flex-wrap:wrap;align-items:center;gap:12px;
+  padding:16px 20px;margin-bottom:20px;
+  background:linear-gradient(145deg, rgba(16, 26, 46, 0.85) 0%, rgba(9, 15, 27, 0.95) 100%);
   border:1px solid var(--border);border-radius:var(--radius);
   box-shadow:var(--shadow-sm);backdrop-filter:blur(16px);
 }
-.sib-name{font-weight:800;font-size:1.3rem;letter-spacing:-0.3px}
-.sib-sym{color:#60a5fa;font-family:var(--mono);font-size:.88rem;font-weight:700;padding:2px 8px;background:rgba(59,130,246,0.12);border-radius:6px}
-.sib-detail{font-size:.82rem;color:var(--text-muted);font-weight:500}
-.sib-price{font-size:1.4rem;font-weight:800;margin-left:auto}
-.sib-change{font-size:.9rem;font-weight:700;padding:4px 10px;border-radius:var(--radius-pill)}
-.sib-change.up{background:var(--green-dim);color:var(--green)}
-.sib-change.down{background:var(--red-dim);color:var(--red)}
+.sib-name{font-weight:800;font-size:1.25rem;letter-spacing:-0.3px}
+.sib-sym{color:#60a5fa;font-family:var(--mono);font-size:.82rem;font-weight:700;padding:2px 8px;background:rgba(59,130,246,0.12);border-radius:6px}
+.sib-detail{font-size:.8rem;color:var(--text-muted);font-weight:500}
+.sib-price{font-size:1.35rem;font-weight:800;margin-left:auto;font-family:var(--mono)}
+.sib-change{font-size:.86rem;font-weight:700;padding:3px 9px;border-radius:var(--radius-pill);font-family:var(--mono)}
+.sib-change.up{background:var(--green-dim);color:var(--green);border:1px solid var(--green-border)}
+.sib-change.down{background:var(--red-dim);color:var(--red);border:1px solid var(--red-border)}
+.sib-runup-badge{
+  font-size:0.75rem;font-weight:700;padding:3px 9px;border-radius:var(--radius-pill);
+  background:rgba(245, 158, 11, 0.12);color:var(--amber);border:1px solid var(--amber-border);
+  font-family:var(--mono);
+}
 
-/* ─── Score & Metrics Section ─── */
-.score-section{
-  display:grid;grid-template-columns:240px 1fr;gap:20px;
+/* ═══════════════════════════════════════════════════════════════
+   GREEN FLAGS VS RED FLAGS MATRIX (HIGH-CONTRAST INSTITUTIONAL)
+   ═══════════════════════════════════════════════════════════════ */
+.flags-matrix-container{
   margin-bottom:24px;
+}
+.flags-matrix-header{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:12px;
+}
+.flags-matrix-header h3{
+  font-size:1.05rem;font-weight:800;color:var(--text-primary);letter-spacing:-0.2px;
+  display:flex;align-items:center;gap:8px;
+}
+.flags-matrix-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:16px;
+}
+@media(max-width:768px){.flags-matrix-grid{grid-template-columns:1fr}}
+
+.flag-matrix-card{
+  background:linear-gradient(145deg, rgba(16, 26, 46, 0.85) 0%, rgba(9, 15, 27, 0.95) 100%);
+  border-radius:var(--radius);padding:20px;box-shadow:var(--shadow-sm);
+  display:flex;flex-direction:column;gap:12px;
+}
+.flag-matrix-card.green-card{
+  border:1px solid rgba(16, 185, 129, 0.35);
+  background:linear-gradient(145deg, rgba(16, 185, 129, 0.04) 0%, rgba(9, 15, 27, 0.95) 100%);
+}
+.flag-matrix-card.red-card{
+  border:1px solid rgba(239, 68, 68, 0.35);
+  background:linear-gradient(145deg, rgba(239, 68, 68, 0.04) 0%, rgba(9, 15, 27, 0.95) 100%);
+}
+
+.fmc-top{
+  display:flex;justify-content:space-between;align-items:center;
+  padding-bottom:10px;border-bottom:1px solid var(--border);
+}
+.fmc-title{font-size:0.92rem;font-weight:800;letter-spacing:0.3px}
+.green-card .fmc-title{color:var(--green)}
+.red-card .fmc-title{color:var(--red)}
+.fmc-count{
+  font-size:0.75rem;font-weight:800;padding:2px 8px;border-radius:var(--radius-pill);
+  font-family:var(--mono);
+}
+.green-card .fmc-count{background:var(--green-dim);color:var(--green);border:1px solid var(--green-border)}
+.red-card .fmc-count{background:var(--red-dim);color:var(--red);border:1px solid var(--red-border)}
+
+.fmc-list{display:flex;flex-direction:column;gap:10px}
+.fmc-item{
+  background:rgba(6, 11, 20, 0.65);border-radius:var(--radius-sm);padding:12px 14px;
+  border:1px solid rgba(148, 163, 184, 0.08);display:flex;flex-direction:column;gap:4px;
+  transition:all .15s;
+}
+.fmc-item:hover{border-color:rgba(148, 163, 184, 0.2);transform:translateX(2px)}
+.fmc-item-badge{
+  font-size:0.7rem;font-weight:800;letter-spacing:0.5px;text-transform:uppercase;
+  display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);
+}
+.green-card .fmc-item-badge{color:var(--green)}
+.red-card .fmc-item-badge{color:var(--red)}
+.fmc-item-text{font-size:0.86rem;color:var(--text-primary);font-weight:600;line-height:1.4}
+.fmc-item-sub{font-size:0.78rem;color:var(--text-secondary);line-height:1.45}
+
+/* ═══════════════════════════════════════════════════════════════
+   SCORE & KEY METRICS GRID
+   ═══════════════════════════════════════════════════════════════ */
+.score-section{
+  display:grid;grid-template-columns:230px 1fr;gap:18px;margin-bottom:24px;
 }
 @media(max-width:768px){.score-section{grid-template-columns:1fr}}
 
 .score-card{
-  background:linear-gradient(145deg, rgba(16, 26, 46, 0.8) 0%, rgba(9, 15, 27, 0.9) 100%);
-  border:1px solid var(--border);border-radius:var(--radius);padding:32px 24px;
+  background:linear-gradient(145deg, rgba(16, 26, 46, 0.85) 0%, rgba(9, 15, 27, 0.95) 100%);
+  border:1px solid var(--border);border-radius:var(--radius);padding:28px 20px;
   text-align:center;display:flex;flex-direction:column;align-items:center;
   justify-content:center;box-shadow:var(--shadow-sm);backdrop-filter:blur(16px);
 }
-.score-ring{width:144px;height:144px;position:relative;margin-bottom:14px}
+.score-ring{width:130px;height:130px;position:relative;margin-bottom:12px}
 .score-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
-.score-ring circle{fill:none;stroke-width:9;stroke-linecap:round}
+.score-ring circle{fill:none;stroke-width:8;stroke-linecap:round}
 .score-ring .ring-bg{stroke:rgba(148, 163, 184, 0.12)}
 .score-ring .ring-fg{stroke:var(--green);transition:stroke-dashoffset 1.2s cubic-bezier(0.16, 1, 0.3, 1),stroke .3s}
 .score-ring .score-num{
   position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  font-size:2.7rem;font-weight:900;letter-spacing:-1px;
+  font-size:2.5rem;font-weight:900;letter-spacing:-1px;font-family:var(--mono);
 }
-.score-grade{font-size:1.6rem;font-weight:800;margin-bottom:4px}
-.score-label{color:var(--text-secondary);font-size:.88rem;font-weight:600}
+.score-grade{font-size:1.45rem;font-weight:800;margin-bottom:3px}
+.score-label{color:var(--text-secondary);font-size:.82rem;font-weight:600}
 
 .metrics-grid{
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
-  gap:12px;align-content:start;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));
+  gap:10px;align-content:start;
 }
 .metric-card{
   background:linear-gradient(145deg, rgba(16, 26, 46, 0.75) 0%, rgba(9, 15, 27, 0.85) 100%);
-  border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;
-  transition:all .2s;
+  border:1px solid var(--border);border-radius:var(--radius-md);padding:12px 14px;
+  transition:all .15s;
 }
-.metric-card:hover{border-color:var(--border-hover);transform:translateY(-2px);box-shadow:var(--shadow-sm)}
-.metric-label{font-size:.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;font-weight:700;margin-bottom:4px}
-.metric-value{font-size:1.2rem;font-weight:800}
-.metric-sub{font-size:.78rem;margin-top:2px;font-weight:600}
+.metric-card:hover{border-color:var(--border-hover);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.metric-label{font-size:.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;font-weight:700;margin-bottom:4px}
+.metric-value{font-size:1.15rem;font-weight:800;font-family:var(--mono)}
+.metric-sub{font-size:.75rem;margin-top:2px;font-weight:600;font-family:var(--mono)}
 .metric-sub.up{color:var(--green)}
 .metric-sub.down{color:var(--red)}
 .metric-sub.neutral{color:var(--text-muted)}
 
 /* ═══════════════════════════════════════════════════════════════
-   FORENSIC REALITY SUITE (SOLVENCY, CASH CONVERSION, CAPEX)
+   FORENSIC REALITY SUITE
    ═══════════════════════════════════════════════════════════════ */
-.forensic-suite{margin-bottom:28px}
+.forensic-suite{margin-bottom:24px}
 .section-header{
-  font-size:1.1rem;font-weight:800;margin-bottom:14px;
-  display:flex;align-items:center;gap:10px;letter-spacing:-0.2px;
+  font-size:1.05rem;font-weight:800;margin-bottom:12px;
+  display:flex;align-items:center;gap:8px;letter-spacing:-0.2px;
+}
+.section-badge{
+  font-size:0.68rem;font-weight:700;padding:2px 7px;border-radius:4px;
+  background:rgba(148, 163, 184, 0.1);color:var(--text-muted);border:1px solid var(--border);
+  letter-spacing:0.5px;text-transform:uppercase;
 }
 .forensic-grid{
-  display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:16px;
+  display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:14px;
 }
 .forensic-card{
   background:linear-gradient(145deg, rgba(16, 26, 46, 0.8) 0%, rgba(9, 15, 27, 0.9) 100%);
-  border:1px solid var(--border);border-radius:var(--radius);padding:22px;
+  border:1px solid var(--border);border-radius:var(--radius);padding:20px;
   box-shadow:var(--shadow-sm);backdrop-filter:blur(16px);
-  display:flex;flex-direction:column;gap:14px;
+  display:flex;flex-direction:column;gap:12px;
 }
 .fc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
-.fc-title-box h4{font-size:1rem;font-weight:800;color:var(--text-primary)}
-.fc-title-box p{font-size:0.8rem;color:var(--text-muted);margin-top:2px}
+.fc-title-box h4{font-size:.95rem;font-weight:800;color:var(--text-primary)}
+.fc-title-box p{font-size:0.78rem;color:var(--text-muted);margin-top:2px}
 .fc-badge{
-  font-size:0.72rem;font-weight:800;padding:4px 10px;
-  border-radius:var(--radius-pill);white-space:nowrap;letter-spacing:0.3px;
+  font-size:0.7rem;font-weight:800;padding:3px 8px;
+  border-radius:var(--radius-pill);white-space:nowrap;letter-spacing:0.3px;font-family:var(--mono);
 }
-.fc-badge.pass{background:var(--green-dim);color:var(--green);border:1px solid rgba(16,185,129,0.3)}
-.fc-badge.warn{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,158,11,0.3)}
-.fc-badge.fail{background:var(--red-dim);color:var(--red);border:1px solid rgba(239,68,68,0.3)}
+.fc-badge.pass{background:var(--green-dim);color:var(--green);border:1px solid var(--green-border)}
+.fc-badge.warn{background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber-border)}
+.fc-badge.fail{background:var(--red-dim);color:var(--red);border:1px solid var(--red-border)}
 
 .fc-bar-wrap{
-  background:rgba(6, 11, 20, 0.7);padding:12px 14px;border-radius:var(--radius-sm);
+  background:rgba(6, 11, 20, 0.7);padding:10px 12px;border-radius:var(--radius-sm);
   border:1px solid rgba(148, 163, 184, 0.08);
 }
-.fc-stat-row{display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:8px}
-.fc-stat-val{font-weight:800;font-family:var(--mono)}
+.fc-stat-row{display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:6px;font-family:var(--mono)}
 .fc-progress-bar{
-  width:100%;height:10px;background:rgba(148, 163, 184, 0.15);
-  border-radius:var(--radius-pill);overflow:hidden;position:relative;
+  width:100%;height:8px;background:rgba(148, 163, 184, 0.15);
+  border-radius:var(--radius-pill);overflow:hidden;
 }
 .fc-progress-fill{height:100%;border-radius:var(--radius-pill);transition:width 1s cubic-bezier(0.16,1,0.3,1)}
 .fc-progress-fill.pass{background:linear-gradient(90deg, #10b981, #34d399)}
 .fc-progress-fill.warn{background:linear-gradient(90deg, #f59e0b, #fbbf24)}
 .fc-progress-fill.fail{background:linear-gradient(90deg, #ef4444, #f87171)}
-.fc-insight{font-size:0.85rem;color:var(--text-secondary);line-height:1.5}
+.fc-insight{font-size:0.82rem;color:var(--text-secondary);line-height:1.5}
 
 /* ═══════════════════════════════════════════════════════════════
-   INTERACTIVE ORDER MARGIN & HYPE SIMULATOR
+   ORDER REALIZATION TIMELINE & MARGIN SIMULATOR
    ═══════════════════════════════════════════════════════════════ */
 .order-simulator-box{
   background:linear-gradient(145deg, rgba(16, 26, 46, 0.85) 0%, rgba(9, 15, 27, 0.95) 100%);
-  border:1px solid rgba(59, 130, 246, 0.3);border-radius:var(--radius);padding:24px;
-  margin-bottom:28px;box-shadow:var(--shadow-sm);backdrop-filter:blur(18px);
+  border:1px solid rgba(59, 130, 246, 0.3);border-radius:var(--radius);padding:22px;
+  margin-bottom:24px;box-shadow:var(--shadow-sm);backdrop-filter:blur(18px);
 }
-.sim-header{display:flex;flex-direction:column;gap:4px;margin-bottom:18px}
-.sim-header h3{font-size:1.15rem;font-weight:800;color:var(--text-primary);display:flex;align-items:center;gap:8px}
-.sim-header p{font-size:0.86rem;color:var(--text-secondary)}
+.sim-header{display:flex;flex-direction:column;gap:4px;margin-bottom:16px}
+.sim-header h3{font-size:1.1rem;font-weight:800;color:var(--text-primary);display:flex;align-items:center;gap:8px}
+.sim-header p{font-size:0.84rem;color:var(--text-secondary)}
+
+/* ─── 4-Phase Timeline Tracker ─── */
+.timeline-tracker{
+  background:rgba(6, 11, 20, 0.8);border:1px solid var(--border);border-radius:var(--radius-md);
+  padding:16px;margin-bottom:18px;
+}
+.timeline-tracker-title{
+  font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;
+  letter-spacing:0.6px;margin-bottom:12px;display:flex;justify-content:space-between;
+}
+.timeline-stages{
+  display:grid;grid-template-columns:repeat(4, 1fr);gap:8px;position:relative;
+}
+@media(max-width:680px){.timeline-stages{grid-template-columns:1fr 1fr}}
+.stage-item{
+  background:rgba(15, 23, 42, 0.85);border:1px solid rgba(148, 163, 184, 0.1);
+  border-radius:var(--radius-sm);padding:10px 12px;display:flex;flex-direction:column;gap:3px;
+}
+.stage-number{font-size:0.7rem;font-weight:800;color:#60a5fa;font-family:var(--mono)}
+.stage-name{font-size:0.82rem;font-weight:700;color:var(--text-primary)}
+.stage-timing{font-size:0.72rem;color:var(--text-muted);font-family:var(--mono)}
+.stage-desc{font-size:0.75rem;color:var(--text-secondary);line-height:1.4;margin-top:2px}
 
 .sim-controls{
   display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;
   background:rgba(6, 11, 20, 0.7);padding:14px 18px;border-radius:var(--radius-md);
-  border:1px solid var(--border);margin-bottom:18px;
+  border:1px solid var(--border);margin-bottom:16px;
 }
 @media(max-width:600px){.sim-controls{grid-template-columns:1fr}}
 .sim-slider-box{display:flex;flex-direction:column;gap:6px}
-.sim-slider-box label{font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase}
+.sim-slider-box label{font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase}
 .sim-slider-box input[type=range]{
-  -webkit-appearance:none;width:100%;height:8px;border-radius:5px;background:rgba(148,163,184,0.2);outline:none;
+  -webkit-appearance:none;width:100%;height:7px;border-radius:5px;background:rgba(148,163,184,0.2);outline:none;
 }
 .sim-slider-box input[type=range]::-webkit-slider-thumb{
-  -webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 0 10px var(--accent-glow);
+  -webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 0 10px var(--accent-glow);
 }
 .sim-input-box{display:flex;align-items:center;gap:6px}
-.sim-input-box span{font-weight:700;color:var(--text-secondary);font-size:0.95rem}
+.sim-input-box span{font-weight:700;color:var(--text-secondary);font-size:0.92rem}
 .sim-input-box input{
-  width:130px;padding:8px 12px;background:var(--bg-input);border:1px solid var(--border);
-  border-radius:var(--radius-sm);color:var(--text-primary);font-weight:800;font-size:1.05rem;text-align:right;font-family:var(--mono);
+  width:125px;padding:8px 12px;background:var(--bg-input);border:1px solid var(--border);
+  border-radius:var(--radius-sm);color:var(--text-primary);font-weight:800;font-size:1rem;text-align:right;font-family:var(--mono);
 }
 .sim-input-box input:focus{border-color:var(--accent)}
 
-.sim-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.sim-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
 .sim-chip{
   background:rgba(15, 23, 42, 0.9);border:1px solid var(--border);
-  border-radius:var(--radius-pill);padding:5px 12px;font-size:0.75rem;
+  border-radius:var(--radius-pill);padding:4px 12px;font-size:0.74rem;
   font-weight:600;color:var(--text-secondary);transition:all .15s;
 }
 .sim-chip:hover{border-color:var(--accent);color:var(--text-primary);background:rgba(59,130,246,0.15)}
 
 .sim-results-grid{
-  display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:12px;margin-bottom:16px;
+  display:grid;grid-template-columns:repeat(auto-fit, minmax(170px, 1fr));gap:10px;margin-bottom:14px;
 }
 .sim-res-card{
   background:rgba(10, 16, 29, 0.85);border:1px solid var(--border);
-  border-radius:var(--radius-md);padding:14px;
+  border-radius:var(--radius-md);padding:12px 14px;
 }
-.sim-res-label{font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px}
-.sim-res-val{font-size:1.25rem;font-weight:900;font-family:var(--mono);color:#60a5fa}
-.sim-res-sub{font-size:0.75rem;color:var(--text-secondary);margin-top:2px}
+.sim-res-label{font-size:0.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px}
+.sim-res-val{font-size:1.2rem;font-weight:900;font-family:var(--mono);color:#60a5fa}
+.sim-res-sub{font-size:0.72rem;color:var(--text-secondary);margin-top:2px}
 
 .sim-diagnostic-callout{
-  padding:14px 18px;border-radius:var(--radius-md);
+  padding:12px 16px;border-radius:var(--radius-md);
   background:rgba(59, 130, 246, 0.08);border:1px solid rgba(59, 130, 246, 0.25);
-  font-size:0.88rem;line-height:1.55;color:var(--text-secondary);
+  font-size:0.85rem;line-height:1.55;color:var(--text-secondary);
 }
 .sim-diagnostic-callout strong{color:var(--text-primary)}
 
-/* ─── Red Flags Checklist ─── */
-.flags-section{margin-bottom:28px}
-.flags-grid{display:flex;flex-direction:column;gap:10px}
+/* ═══════════════════════════════════════════════════════════════
+   IN-SCREEN DOCUMENT INSPECTOR & FINANCIAL STATEMENTS LEDGER
+   ═══════════════════════════════════════════════════════════════ */
+.doc-inspector-section{margin-bottom:24px}
+.doc-inspector-card{
+  background:linear-gradient(145deg, rgba(16, 26, 46, 0.85) 0%, rgba(9, 15, 27, 0.95) 100%);
+  border:1px solid var(--border);border-radius:var(--radius);padding:22px;
+  box-shadow:var(--shadow-sm);backdrop-filter:blur(18px);
+}
+.doc-inspector-nav{
+  display:flex;gap:8px;border-bottom:1px solid var(--border);padding-bottom:12px;margin-bottom:16px;
+  overflow-x:auto;
+}
+.doc-tab-btn{
+  padding:6px 14px;border-radius:var(--radius-pill);font-size:0.8rem;font-weight:700;
+  color:var(--text-secondary);background:rgba(10, 16, 29, 0.8);border:1px solid var(--border);
+  transition:all .15s;white-space:nowrap;
+}
+.doc-tab-btn:hover{color:var(--text-primary);border-color:rgba(148,163,184,0.3)}
+.doc-tab-btn.active{
+  background:linear-gradient(135deg, rgba(59,130,246,0.25), rgba(59,130,246,0.1));
+  color:#93c5fd;border-color:var(--accent);
+}
+
+.doc-sub-view{display:none}
+.doc-sub-view.active{display:block}
+
+/* ─── Ledger Table ─── */
+.ledger-table-wrap{
+  overflow-x:auto;background:rgba(6, 11, 20, 0.7);border-radius:var(--radius-md);
+  border:1px solid var(--border);
+}
+.ledger-table{
+  width:100%;border-collapse:collapse;font-size:0.84rem;text-align:right;
+}
+.ledger-table th,.ledger-table td{
+  padding:10px 14px;border-bottom:1px solid rgba(148, 163, 184, 0.08);
+}
+.ledger-table th{
+  background:rgba(15, 23, 42, 0.95);color:var(--text-muted);font-weight:700;
+  text-transform:uppercase;font-size:0.72rem;letter-spacing:0.5px;
+}
+.ledger-table th:first-child,.ledger-table td:first-child{
+  text-align:left;font-weight:700;color:var(--text-primary);
+}
+.ledger-table tr:hover td{background:rgba(59, 130, 246, 0.06)}
+.ledger-table td{font-family:var(--mono);color:var(--text-secondary)}
+.ledger-table td.highlight-green{color:var(--green);font-weight:700}
+.ledger-table td.highlight-red{color:var(--red);font-weight:700}
+
+/* ─── Official Filings Grid ─── */
+.filings-grid{
+  display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:12px;
+}
+.filing-card{
+  background:rgba(10, 16, 29, 0.85);border:1px solid var(--border);border-radius:var(--radius-md);
+  padding:16px;display:flex;flex-direction:column;justify-content:space-between;gap:12px;
+  transition:all .15s;
+}
+.filing-card:hover{border-color:var(--border-hover);transform:translateY(-1px)}
+.filing-info h4{font-size:0.9rem;font-weight:700;color:var(--text-primary);margin-bottom:4px}
+.filing-info p{font-size:0.78rem;color:var(--text-secondary);line-height:1.45}
+.filing-actions{display:flex;gap:8px;margin-top:auto}
+.btn-doc-preview{
+  padding:6px 12px;border-radius:var(--radius-pill);font-size:0.75rem;font-weight:700;
+  background:rgba(59, 130, 246, 0.15);color:#93c5fd;border:1px solid rgba(59, 130, 246, 0.35);
+  transition:all .15s;
+}
+.btn-doc-preview:hover{background:var(--accent);color:#fff}
+.btn-doc-direct{
+  padding:6px 12px;border-radius:var(--radius-pill);font-size:0.75rem;font-weight:600;
+  background:transparent;color:var(--text-muted);border:1px solid var(--border);
+  transition:all .15s;
+}
+.btn-doc-direct:hover{color:var(--text-primary);border-color:rgba(148,163,184,0.3)}
+
+/* ═══════════════════════════════════════════════════════════════
+   IN-SCREEN DOCUMENT READER MODAL
+   ═══════════════════════════════════════════════════════════════ */
+.doc-modal-overlay{
+  position:fixed;top:0;left:0;right:0;bottom:0;z-index:999;
+  background:rgba(3, 7, 18, 0.88);backdrop-filter:blur(16px);
+  display:none;align-items:center;justify-content:center;padding:20px;
+}
+.doc-modal-overlay.active{display:flex}
+.doc-modal-box{
+  background:linear-gradient(145deg, #0d1627 0%, #090f1d 100%);
+  border:1px solid var(--border);border-radius:var(--radius);
+  width:100%;max-width:1100px;height:90vh;display:flex;flex-direction:column;
+  box-shadow:var(--shadow-md);overflow:hidden;
+}
+.doc-modal-header{
+  padding:14px 20px;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+  background:rgba(15, 23, 42, 0.85);flex-shrink:0;
+}
+.doc-modal-title-box h3{font-size:1rem;font-weight:800;color:var(--text-primary)}
+.doc-modal-title-box p{font-size:0.78rem;color:var(--text-muted)}
+.doc-modal-controls{display:flex;align-items:center;gap:10px}
+.btn-doc-modal{
+  padding:6px 12px;border-radius:var(--radius-pill);font-size:0.78rem;font-weight:700;
+  border:1px solid var(--border);background:rgba(10, 16, 29, 0.8);color:var(--text-secondary);
+  transition:all .15s;
+}
+.btn-doc-modal:hover{color:var(--text-primary);border-color:var(--accent)}
+.btn-doc-close{
+  padding:6px 14px;border-radius:var(--radius-pill);font-size:0.78rem;font-weight:700;
+  background:rgba(239, 68, 68, 0.15);color:#f87171;border:1px solid rgba(239, 68, 68, 0.3);
+  transition:all .15s;
+}
+.btn-doc-close:hover{background:#ef4444;color:#fff}
+.doc-modal-body{
+  flex:1;background:rgba(6, 11, 20, 0.95);position:relative;overflow:hidden;
+}
+.doc-modal-iframe{
+  width:100%;height:100%;border:none;background:#fff;
+}
+.doc-modal-fallback{
+  position:absolute;top:0;left:0;right:0;bottom:0;
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  padding:30px;text-align:center;background:rgba(9, 15, 27, 0.95);color:var(--text-secondary);
+}
+.doc-modal-fallback h4{color:var(--text-primary);font-size:1.1rem;margin-bottom:8px}
+.doc-modal-fallback p{max-width:500px;font-size:0.86rem;margin-bottom:18px}
+
+/* ═══════════════════════════════════════════════════════════════
+   CHECKLIST, CHARTS, AI VERDICT & NEWS
+   ═══════════════════════════════════════════════════════════════ */
+.flags-section{margin-bottom:24px}
+.flags-grid{display:flex;flex-direction:column;gap:8px}
 .flag-item{
-  display:flex;align-items:flex-start;gap:12px;padding:14px 16px;
+  display:flex;align-items:flex-start;gap:12px;padding:12px 16px;
   background:linear-gradient(145deg, rgba(16, 26, 46, 0.7) 0%, rgba(9, 15, 27, 0.8) 100%);
-  border:1px solid var(--border);border-radius:var(--radius-md);font-size:.9rem;
-  transition:all .2s;
+  border:1px solid var(--border);border-radius:var(--radius-md);font-size:.88rem;
+  transition:all .15s;
 }
 .flag-item:hover{border-color:var(--border-hover)}
-.flag-item.pass{border-left:4px solid var(--green)}
-.flag-item.fail{border-left:4px solid var(--red)}
-.flag-item.warn{border-left:4px solid var(--amber)}
-.flag-item.na{border-left:4px solid var(--text-muted)}
-.flag-icon{font-size:1.1rem;flex-shrink:0;margin-top:1px}
+.flag-item.pass{border-left:3px solid var(--green)}
+.flag-item.fail{border-left:3px solid var(--red)}
+.flag-item.warn{border-left:3px solid var(--amber)}
+.flag-item.na{border-left:3px solid var(--text-muted)}
+.flag-tag{
+  font-size:0.68rem;font-weight:800;padding:2px 7px;border-radius:4px;
+  font-family:var(--mono);letter-spacing:0.5px;flex-shrink:0;margin-top:2px;
+}
+.flag-item.pass .flag-tag{background:var(--green-dim);color:var(--green);border:1px solid var(--green-border)}
+.flag-item.fail .flag-tag{background:var(--red-dim);color:var(--red);border:1px solid var(--red-border)}
+.flag-item.warn .flag-tag{background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber-border)}
+.flag-item.na .flag-tag{background:rgba(148,163,184,0.1);color:var(--text-muted);border:1px solid var(--border)}
 .flag-text{flex:1}
 .flag-name{font-weight:700;margin-bottom:2px}
-.flag-detail{color:var(--text-secondary);font-size:.85rem;line-height:1.45}
+.flag-detail{color:var(--text-secondary);font-size:.82rem;line-height:1.45}
 
 /* ─── Charts ─── */
-.charts-section{margin-bottom:28px}
-.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.charts-section{margin-bottom:24px}
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media(max-width:768px){.charts-grid{grid-template-columns:1fr}}
 .chart-box{
   background:linear-gradient(145deg, rgba(16, 26, 46, 0.8) 0%, rgba(9, 15, 27, 0.9) 100%);
-  border:1px solid var(--border);border-radius:var(--radius);padding:20px;
+  border:1px solid var(--border);border-radius:var(--radius);padding:18px;
   box-shadow:var(--shadow-sm);
 }
-.chart-box h4{font-size:.88rem;font-weight:700;color:var(--text-secondary);margin-bottom:14px}
-.chart-box canvas{width:100%!important;max-height:220px}
+.chart-box h4{font-size:.84rem;font-weight:700;color:var(--text-secondary);margin-bottom:12px}
+.chart-box canvas{width:100%!important;max-height:210px}
 
 /* ─── AI Verdict Box ─── */
-.verdict-section{margin-bottom:28px}
+.verdict-section{margin-bottom:24px}
 .verdict-box{
   background:linear-gradient(145deg, rgba(16, 26, 46, 0.8) 0%, rgba(9, 15, 27, 0.9) 100%);
   border:1px solid var(--border);border-radius:var(--radius);padding:24px;
-  font-size:.92rem;line-height:1.75;color:var(--text-secondary);box-shadow:var(--shadow-sm);
+  font-size:.9rem;line-height:1.75;color:var(--text-secondary);box-shadow:var(--shadow-sm);
 }
 .verdict-box h1,.verdict-box h2,.verdict-box h3,.verdict-box h4{color:var(--text-primary);margin:16px 0 8px;font-weight:800}
 .verdict-box h1:first-child,.verdict-box h2:first-child,.verdict-box h3:first-child{margin-top:0}
 .verdict-box strong{color:var(--text-primary)}
 .verdict-box ul,.verdict-box ol{padding-left:22px;margin:8px 0 14px}
 .verdict-box li{margin-bottom:5px}
-.verdict-box code{background:var(--bg-primary);border:1px solid var(--border);padding:2px 6px;border-radius:5px;font-family:var(--mono);font-size:.85em;color:#93c5fd}
+.verdict-box code{background:var(--bg-primary);border:1px solid var(--border);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:.85em;color:#93c5fd}
 .verdict-loading{color:var(--text-muted);font-style:italic;display:flex;align-items:center;gap:10px}
 .verdict-loading .mini-spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite}
 
 /* ─── News Section ─── */
-.news-section{margin-bottom:28px}
-.news-list{display:flex;flex-direction:column;gap:10px}
+.news-section{margin-bottom:24px}
+.news-list{display:flex;flex-direction:column;gap:8px}
 .news-item{
   display:flex;justify-content:space-between;align-items:flex-start;gap:14px;
-  padding:14px 18px;background:linear-gradient(145deg, rgba(16, 26, 46, 0.7) 0%, rgba(9, 15, 27, 0.8) 100%);
-  border:1px solid var(--border);border-radius:var(--radius-md);transition:all .2s;
+  padding:12px 16px;background:linear-gradient(145deg, rgba(16, 26, 46, 0.7) 0%, rgba(9, 15, 27, 0.8) 100%);
+  border:1px solid var(--border);border-radius:var(--radius-md);transition:all .15s;
   text-decoration:none;color:inherit;
 }
-.news-item:hover{background:rgba(59,130,246,0.12);border-color:var(--border-hover);transform:translateX(3px)}
-.news-title{font-size:.9rem;font-weight:600;flex:1;line-height:1.45}
+.news-item:hover{background:rgba(59,130,246,0.1);border-color:var(--border-hover);transform:translateX(3px)}
+.news-title{font-size:.88rem;font-weight:600;flex:1;line-height:1.45}
 .news-meta{display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0;gap:4px}
-.news-source{font-size:.75rem;color:var(--text-muted);font-weight:600}
-.news-date{font-size:.72rem;color:var(--text-muted)}
-.news-sentiment{font-size:.7rem;padding:2px 8px;border-radius:var(--radius-pill);font-weight:700;text-transform:uppercase}
-.news-sentiment.positive{background:var(--green-dim);color:var(--green)}
-.news-sentiment.negative{background:var(--red-dim);color:var(--red)}
-.news-sentiment.neutral{background:rgba(148,163,184,0.1);color:var(--text-muted)}
+.news-source{font-size:.72rem;color:var(--text-muted);font-weight:600}
+.news-date{font-size:.7rem;color:var(--text-muted);font-family:var(--mono)}
+.news-sentiment{font-size:.68rem;padding:2px 7px;border-radius:var(--radius-pill);font-weight:700;text-transform:uppercase;font-family:var(--mono)}
+.news-sentiment.positive{background:var(--green-dim);color:var(--green);border:1px solid var(--green-border)}
+.news-sentiment.negative{background:var(--red-dim);color:var(--red);border:1px solid var(--red-border)}
+.news-sentiment.neutral{background:rgba(148,163,184,0.1);color:var(--text-muted);border:1px solid var(--border)}
 
 /* ═══════════════════════════════════════════════════════════════
    RUMOR BUSTER MODE
    ═══════════════════════════════════════════════════════════════ */
 .rumor-input-box{
   background:linear-gradient(145deg, rgba(16, 26, 46, 0.85) 0%, rgba(9, 15, 27, 0.95) 100%);
-  border:1px solid var(--border);border-radius:var(--radius);padding:28px;
-  margin-bottom:28px;box-shadow:var(--shadow-sm);backdrop-filter:blur(18px);
+  border:1px solid var(--border);border-radius:var(--radius);padding:24px;
+  margin-bottom:24px;box-shadow:var(--shadow-sm);backdrop-filter:blur(18px);
 }
-.rumor-input-box h3{margin-bottom:6px;font-size:1.25rem;font-weight:800}
-.rumor-input-box p{color:var(--text-secondary);font-size:.88rem;margin-bottom:18px}
+.rumor-input-box h3{margin-bottom:6px;font-size:1.15rem;font-weight:800}
+.rumor-input-box p{color:var(--text-secondary);font-size:.86rem;margin-bottom:16px}
 .rumor-input-box textarea{
-  width:100%;min-height:95px;padding:14px 16px;
+  width:100%;min-height:90px;padding:12px 14px;
   background:var(--bg-input);border:1px solid var(--border);
   border-radius:var(--radius-md);color:var(--text-primary);
-  font-size:.95rem;resize:vertical;margin-bottom:14px;transition:border-color .2s;
+  font-size:.92rem;resize:vertical;margin-bottom:12px;transition:border-color .2s;
 }
 .rumor-input-box textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
 .rumor-input-box textarea::placeholder{color:var(--text-muted)}
 
-.rumor-row{display:flex;gap:12px;align-items:center}
+.rumor-row{display:flex;gap:10px;align-items:center}
 @media(max-width:600px){.rumor-row{flex-direction:column}}
 .rumor-row input{
-  flex:1;padding:12px 18px;background:var(--bg-input);
+  flex:1;padding:12px 16px;background:var(--bg-input);
   border:1px solid var(--border);border-radius:var(--radius-pill);
-  color:var(--text-primary);font-size:.92rem;
+  color:var(--text-primary);font-size:.9rem;
 }
 .rumor-row input:focus{border-color:var(--accent)}
 .rumor-row input::placeholder{color:var(--text-muted)}
 .rumor-btn{
-  padding:12px 28px;background:linear-gradient(135deg, var(--red), #dc2626);color:#fff;
-  border-radius:var(--radius-pill);font-weight:700;font-size:.92rem;
-  box-shadow:0 4px 18px var(--red-glow);transition:all .2s;white-space:nowrap;
+  padding:12px 26px;background:linear-gradient(135deg, var(--accent), var(--accent-hover));color:#fff;
+  border-radius:var(--radius-pill);font-weight:700;font-size:.88rem;
+  box-shadow:0 4px 18px var(--accent-glow);transition:all .2s;white-space:nowrap;
 }
-.rumor-btn:hover{transform:translateY(-1px);box-shadow:0 6px 22px rgba(239,68,68,0.45)}
+.rumor-btn:hover{transform:translateY(-1px);box-shadow:0 6px 22px rgba(59,130,246,0.45)}
 .rumor-btn:disabled{opacity:.5;cursor:not-allowed}
 
 .rumor-chip{
   background:rgba(10, 16, 29, 0.9);border:1px solid var(--border);border-radius:var(--radius-pill);
-  padding:6px 14px;font-size:.78rem;font-weight:600;color:var(--text-secondary);
+  padding:5px 12px;font-size:.76rem;font-weight:600;color:var(--text-secondary);
   transition:all .15s;cursor:pointer;
 }
 .rumor-chip:hover{background:rgba(59,130,246,0.15);color:var(--text-primary);border-color:var(--accent)}
 
 .rumor-result{
   background:linear-gradient(145deg, rgba(16, 26, 46, 0.85) 0%, rgba(9, 15, 27, 0.95) 100%);
-  border:1px solid var(--border);border-radius:var(--radius);padding:28px;
-  font-size:.94rem;line-height:1.75;color:var(--text-secondary);box-shadow:var(--shadow-md);
+  border:1px solid var(--border);border-radius:var(--radius);padding:24px;
+  font-size:.92rem;line-height:1.75;color:var(--text-secondary);box-shadow:var(--shadow-md);
 }
 .rumor-result h1,.rumor-result h2,.rumor-result h3,.rumor-result h4{
-  color:var(--text-primary);margin:18px 0 10px;font-weight:800;line-height:1.35;
+  color:var(--text-primary);margin:16px 0 10px;font-weight:800;line-height:1.35;
 }
-.rumor-result h1{font-size:1.35rem}
-.rumor-result h2{font-size:1.2rem}
-.rumor-result h3{font-size:1.05rem}
-.rumor-result h4{font-size:0.95rem}
+.rumor-result h1{font-size:1.3rem}
+.rumor-result h2{font-size:1.15rem}
+.rumor-result h3{font-size:1rem}
+.rumor-result h4{font-size:0.92rem}
 .rumor-result p{margin:8px 0}
 .rumor-result ul,.rumor-result ol{padding-left:22px;margin:8px 0 14px}
 .rumor-result li{margin-bottom:6px}
 .rumor-result strong{color:var(--text-primary)}
 .rumor-result code{
-  background:var(--bg-primary);border:1px solid var(--border);padding:2px 7px;
-  border-radius:5px;font-family:var(--mono);font-size:0.85em;color:#93c5fd;
+  background:var(--bg-primary);border:1px solid var(--border);padding:2px 6px;
+  border-radius:4px;font-family:var(--mono);font-size:0.85em;color:#93c5fd;
 }
 
-.score-callout{
-  padding:18px 24px;border-radius:var(--radius-md);margin:18px 0 22px;
+.verdict-banner{
+  padding:16px 20px;border-radius:var(--radius-md);margin:16px 0 20px;display:flex;flex-direction:column;gap:4px;
 }
-.score-callout.fail{
-  background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.35);box-shadow:0 0 25px rgba(239,68,68,0.15);
+.verdict-banner.sovereign{
+  background:rgba(16,185,129,0.1);border:1px solid var(--green-border);box-shadow:0 0 25px var(--green-glow);
 }
-.score-callout.fail .sc-title{color:#ef4444;font-size:1.25rem;font-weight:900}
-.score-callout.pass{
-  background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.35);box-shadow:0 0 25px rgba(16,185,129,0.15);
-}
-.score-callout.pass .sc-title{color:#10b981;font-size:1.25rem;font-weight:900}
-.score-callout.warn{
-  background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.35);box-shadow:0 0 25px rgba(245,158,11,0.15);
-}
-.score-callout.warn .sc-title{color:#f59e0b;font-size:1.25rem;font-weight:900}
-.score-callout .sc-sub{color:var(--text-secondary);font-size:0.88rem;margin-top:4px;font-weight:600}
+.verdict-banner.sovereign .vb-status{color:var(--green);font-size:0.75rem;font-weight:800;font-family:var(--mono);letter-spacing:1px}
+.verdict-banner.sovereign .vb-headline{color:#fff;font-size:1.15rem;font-weight:800}
 
-/* ─── 5-Pillar Reality Matrix ─── */
+.verdict-banner.high-risk{
+  background:rgba(239,68,68,0.1);border:1px solid var(--red-border);box-shadow:0 0 25px var(--red-glow);
+}
+.verdict-banner.high-risk .vb-status{color:var(--red);font-size:0.75rem;font-weight:800;font-family:var(--mono);letter-spacing:1px}
+.verdict-banner.high-risk .vb-headline{color:#fff;font-size:1.15rem;font-weight:800}
+
+.verdict-banner.caution{
+  background:rgba(245,158,11,0.1);border:1px solid var(--amber-border);box-shadow:0 0 25px var(--amber-glow);
+}
+.verdict-banner.caution .vb-status{color:var(--amber);font-size:0.75rem;font-weight:800;font-family:var(--mono);letter-spacing:1px}
+.verdict-banner.caution .vb-headline{color:#fff;font-size:1.15rem;font-weight:800}
+
+.vb-summary{color:var(--text-secondary);font-size:0.86rem;margin-top:2px}
+
 .reality-matrix{
-  display:grid;grid-template-columns:repeat(auto-fit, minmax(190px, 1fr));gap:12px;
-  margin:18px 0 26px;
+  display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:10px;
+  margin:16px 0 22px;
 }
 .matrix-card{
   background:rgba(10, 16, 29, 0.85);border:1px solid var(--border);
-  border-radius:var(--radius-md);padding:16px;display:flex;flex-direction:column;
-  gap:6px;transition:all .2s;box-shadow:var(--shadow-sm);
+  border-radius:var(--radius-md);padding:14px;display:flex;flex-direction:column;
+  gap:4px;transition:all .15s;
 }
-.matrix-card:hover{transform:translateY(-2px)}
-.matrix-card.pass{border-color:rgba(16, 185, 129, 0.45);box-shadow:0 4px 18px rgba(16, 185, 129, 0.12)}
-.matrix-card.fail{border-color:rgba(239, 68, 68, 0.45);box-shadow:0 4px 18px rgba(239, 68, 68, 0.12)}
-.matrix-card.warn{border-color:rgba(245, 158, 11, 0.45);box-shadow:0 4px 18px rgba(245, 158, 11, 0.12)}
-.matrix-card .mc-icon{font-size:1.5rem}
-.matrix-card .mc-title{font-size:0.8rem;font-weight:800;color:var(--text-primary);text-transform:uppercase;letter-spacing:0.5px}
+.matrix-card:hover{transform:translateY(-1px)}
+.matrix-card.pass{border-color:var(--green-border)}
+.matrix-card.fail{border-color:var(--red-border)}
+.matrix-card.warn{border-color:var(--amber-border)}
+.matrix-card .mc-title{font-size:0.75rem;font-weight:800;color:var(--text-primary);text-transform:uppercase;letter-spacing:0.5px}
 .matrix-card .mc-badge{
-  align-self:flex-start;font-size:0.68rem;font-weight:800;padding:2px 8px;
-  border-radius:var(--radius-pill);letter-spacing:0.5px;
+  align-self:flex-start;font-size:0.65rem;font-weight:800;padding:2px 6px;
+  border-radius:var(--radius-pill);letter-spacing:0.5px;font-family:var(--mono);
 }
-.matrix-card .mc-badge.pass{background:rgba(16,185,129,0.25);color:#34d399}
-.matrix-card .mc-badge.fail{background:rgba(239,68,68,0.25);color:#f87171}
-.matrix-card .mc-badge.warn{background:rgba(245,158,11,0.25);color:#fbbf24}
-.matrix-card .mc-desc{font-size:0.8rem;color:var(--text-secondary);line-height:1.45;margin-top:2px}
+.matrix-card .mc-badge.pass{background:var(--green-dim);color:var(--green);border:1px solid var(--green-border)}
+.matrix-card .mc-badge.fail{background:var(--red-dim);color:var(--red);border:1px solid var(--red-border)}
+.matrix-card .mc-badge.warn{background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber-border)}
+.matrix-card .mc-desc{font-size:0.78rem;color:var(--text-secondary);line-height:1.45;margin-top:2px}
 
 .rumor-result blockquote, .verdict-box blockquote, .chat-msg blockquote{
-  border-left:4px solid var(--accent);background:rgba(6, 11, 20, 0.85);padding:12px 18px;
-  margin:14px 0;border-radius:0 var(--radius-sm) var(--radius-sm) 0;color:var(--text-secondary);
+  border-left:3px solid var(--accent);background:rgba(6, 11, 20, 0.85);padding:10px 16px;
+  margin:12px 0;border-radius:0 var(--radius-sm) var(--radius-sm) 0;color:var(--text-secondary);
+  font-size:0.86rem;
 }
 .rumor-result a, .verdict-box a, .chat-msg a{
   color:#60a5fa !important;text-decoration:underline !important;text-underline-offset:3px;
-  font-weight:600;word-break:break-word;cursor:pointer !important;transition:color .15s;
+  font-weight:600;word-break:break-word;cursor:pointer !important;
 }
 .rumor-result a:hover, .verdict-box a:hover, .chat-msg a:hover{color:#93c5fd !important}
 
 /* ═══════════════════════════════════════════════════════════════
-   CHAT MODE
+   CHAT COPILOT MODE
    ═══════════════════════════════════════════════════════════════ */
 .chat-container{
   display:flex;flex-direction:column;height:calc(100vh - 170px);
@@ -567,92 +825,89 @@ input,textarea,select{font-family:var(--font);outline:none}
   box-shadow:var(--shadow-md);
 }
 .chat-header{
-  padding:14px 20px;border-bottom:1px solid var(--border);
-  display:flex;align-items:center;gap:10px;font-size:.88rem;
-  color:var(--text-secondary);font-weight:600;flex-shrink:0;background:rgba(6,11,20,0.5);
+  padding:12px 18px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;font-size:.85rem;
+  color:var(--text-secondary);font-weight:600;flex-shrink:0;background:rgba(6,11,20,0.6);
 }
-.chat-header .dot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green)}
+.chat-header .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green)}
 .chat-messages{
-  flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px;
+  flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px;
 }
 .chat-msg{
-  max-width:85%;padding:14px 18px;border-radius:18px;font-size:.92rem;line-height:1.65;
+  max-width:85%;padding:12px 16px;border-radius:14px;font-size:.88rem;line-height:1.65;
 }
 .chat-msg.user{
   align-self:flex-end;background:linear-gradient(135deg, var(--accent), #2563eb);color:#fff;
-  border-bottom-right-radius:4px;box-shadow:0 4px 16px var(--accent-glow);
+  border-bottom-right-radius:2px;box-shadow:0 4px 16px var(--accent-glow);
 }
 .chat-msg.assistant{
   align-self:flex-start;background:rgba(10, 16, 29, 0.92);
   color:var(--text-secondary);border:1px solid var(--border);
-  border-bottom-left-radius:4px;box-shadow:var(--shadow-sm);
+  border-bottom-left-radius:2px;box-shadow:var(--shadow-sm);
 }
 .chat-msg.assistant h1,.chat-msg.assistant h2,.chat-msg.assistant h3,.chat-msg.assistant h4{
-  color:var(--text-primary);margin:12px 0 6px;font-weight:800;font-size:1rem;
+  color:var(--text-primary);margin:10px 0 6px;font-weight:800;font-size:.95rem;
 }
-.chat-msg.assistant h1:first-child,.chat-msg.assistant h2:first-child,.chat-msg.assistant h3:first-child{margin-top:0}
 .chat-msg.assistant strong{color:var(--text-primary)}
-.chat-msg.assistant ul,.chat-msg.assistant ol{padding-left:20px;margin:6px 0 10px}
+.chat-msg.assistant ul,.chat-msg.assistant ol{padding-left:18px;margin:6px 0 8px}
 .chat-msg.assistant li{margin-bottom:4px}
-.chat-msg.assistant code{background:var(--bg-primary);border:1px solid var(--border);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:.85em;color:#93c5fd}
+.chat-msg.assistant code{background:var(--bg-primary);border:1px solid var(--border);padding:2px 5px;border-radius:3px;font-family:var(--mono);font-size:.85em;color:#93c5fd}
 .chat-msg.system{
-  align-self:center;color:var(--text-muted);font-size:.82rem;font-style:italic;text-align:center;
+  align-self:center;color:var(--text-muted);font-size:.78rem;font-style:italic;text-align:center;
 }
 .chat-input-row{
-  display:flex;gap:0;border-top:1px solid var(--border);flex-shrink:0;background:var(--bg-input);
+  padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:10px;
+  background:rgba(6,11,20,0.85);
 }
 .chat-input-row input{
-  flex:1;padding:16px 20px;background:transparent;border:none;
-  color:var(--text-primary);font-size:.95rem;
+  flex:1;padding:10px 16px;background:var(--bg-input);border:1px solid var(--border);
+  border-radius:var(--radius-pill);color:var(--text-primary);font-size:.88rem;
 }
-.chat-input-row input::placeholder{color:var(--text-muted)}
+.chat-input-row input:focus{border-color:var(--accent)}
 .chat-input-row button{
-  padding:16px 24px;background:linear-gradient(135deg, var(--accent), var(--accent-hover));
-  color:#fff;font-weight:700;transition:background .2s;letter-spacing:0.3px;
+  padding:10px 22px;background:linear-gradient(135deg, var(--accent), var(--accent-hover));
+  color:#fff;border-radius:var(--radius-pill);font-weight:700;font-size:.88rem;
 }
-.chat-input-row button:hover{background:#1d4ed8}
-.chat-input-row button:disabled{opacity:.5;cursor:not-allowed}
 
-/* ─── Settings Toggle & Modal ─── */
+/* ─── Settings Modal & FAB ─── */
 .settings-btn{
-  position:fixed;bottom:24px;right:24px;z-index:50;
-  width:48px;height:48px;border-radius:50%;background:rgba(15, 23, 42, 0.9);
-  border:1px solid var(--border);color:var(--text-secondary);
-  font-size:1.3rem;display:flex;align-items:center;justify-content:center;
-  box-shadow:var(--shadow-md);transition:all .2s;backdrop-filter:blur(16px);
+  position:fixed;bottom:24px;right:24px;width:44px;height:44px;border-radius:50%;
+  background:rgba(15, 23, 42, 0.85);border:1px solid var(--border);
+  color:var(--text-secondary);display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--shadow-md);transition:all .2s;z-index:90;
 }
-.settings-btn:hover{background:rgba(59,130,246,0.2);color:var(--text-primary);transform:rotate(30deg)}
+.settings-btn svg{width:20px;height:20px}
+.settings-btn:hover{color:var(--text-primary);border-color:var(--accent);transform:scale(1.05)}
 
 .modal-overlay{
-  display:none;position:fixed;top:0;left:0;right:0;bottom:0;
-  background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;
-  backdrop-filter:blur(10px);
+  position:fixed;top:0;left:0;right:0;bottom:0;z-index:998;
+  background:rgba(3, 7, 18, 0.8);backdrop-filter:blur(12px);
+  display:none;align-items:center;justify-content:center;padding:20px;
 }
 .modal-overlay.active{display:flex}
 .modal-box{
   background:linear-gradient(145deg, #0d1627 0%, #090f1d 100%);
-  border:1px solid var(--border);border-radius:var(--radius);padding:32px;
-  max-width:460px;width:92%;box-shadow:var(--shadow-md);
+  border:1px solid var(--border);border-radius:var(--radius);padding:28px;
+  max-width:460px;width:100%;box-shadow:var(--shadow-md);
 }
-.modal-box h2{margin-bottom:20px;font-size:1.2rem;font-weight:800;display:flex;align-items:center;gap:8px}
+.modal-box h2{font-size:1.2rem;font-weight:800;margin-bottom:18px}
 .modal-group{margin-bottom:18px}
-.modal-group label{display:block;font-size:.85rem;font-weight:600;color:var(--text-secondary);margin-bottom:8px}
-.modal-group input,.modal-group select{
-  width:100%;padding:12px 14px;background:var(--bg-input);
-  border:1px solid var(--border);border-radius:var(--radius-sm);
-  color:var(--text-primary);font-size:.92rem;
+.modal-group label{display:block;font-size:.78rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px}
+.modal-group select,.modal-group input{
+  width:100%;padding:10px 14px;border-radius:var(--radius-sm);
+  background:var(--bg-input);border:1px solid var(--border);
+  color:var(--text-primary);font-size:.88rem;
 }
-.modal-group input:focus,.modal-group select:focus{border-color:var(--accent)}
-.modal-group small{display:block;margin-top:6px;color:var(--text-muted);font-size:.78rem;line-height:1.4}
-.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:24px}
-.modal-actions button{padding:10px 22px;border-radius:var(--radius-pill);font-size:.9rem;font-weight:700}
-.btn-primary{background:linear-gradient(135deg, var(--accent), var(--accent-hover));color:#fff}
-.btn-ghost{background:transparent;color:var(--text-secondary);border:1px solid var(--border)}
-.btn-ghost:hover{background:rgba(148,163,184,0.1);color:var(--text-primary)}
+.modal-group small{display:block;color:var(--text-muted);font-size:.75rem;margin-top:6px}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:24px}
+.btn-primary{
+  padding:10px 20px;border-radius:var(--radius-pill);background:var(--accent);
+  color:#fff;font-weight:700;font-size:.88rem;
+}
+.btn-ghost{padding:10px 18px;border-radius:var(--radius-pill);background:transparent;color:var(--text-secondary);border:1px solid var(--border);font-size:.88rem}
 
-/* ─── Disclaimer ─── */
 .disclaimer{
-  text-align:center;padding:24px;color:var(--text-muted);font-size:.78rem;
+  text-align:center;padding:24px;color:var(--text-muted);font-size:.76rem;
   border-top:1px solid var(--border);margin-top:40px;line-height:1.6;
 }
 </style>
@@ -664,9 +919,13 @@ input,textarea,select{font-family:var(--font);outline:none}
      ═══════════════════════════════════════════════════════════════ -->
 <div id="password-gate">
   <div class="pw-box">
-    <span class="pw-icon">🔍</span>
+    <div class="pw-glyph">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+    </div>
     <h1>StockSight</h1>
-    <p>Institutional Quantitative Equity Intelligence.<br>Enter password to unlock the terminal.</p>
+    <p>Institutional Quantitative Equity Intelligence & Forensic Engine.<br>Enter password to unlock terminal.</p>
     <input type="password" id="pw-input" placeholder="••••" autocomplete="off">
     <button id="pw-btn" onclick="checkPassword()">Unlock Terminal</button>
     <div class="pw-error" id="pw-error">Access denied. Invalid password.</div>
@@ -680,22 +939,27 @@ input,textarea,select{font-family:var(--font);outline:none}
   <!-- Header -->
   <header class="app-header">
     <div class="app-logo" onclick="switchMode('quality')">
-      <span>🔍</span>
+      <div class="app-logo-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+        </svg>
+      </div>
       <h1>StockSight</h1>
+      <span class="app-badge-tag">Institutional</span>
     </div>
 
     <div class="search-wrapper">
       <div class="search-bar">
-        <input type="text" id="search-input" placeholder="Search stock or company (e.g. RELIANCE, COCHINSHIP, BEL, TCS...)" autocomplete="off">
+        <input type="text" id="search-input" placeholder="Search stock or company (e.g. COCHINSHIP, BEL, RELIANCE, TCS, HDFCBANK...)" autocomplete="off">
         <button id="search-btn" onclick="handleAnalyze()">Analyze</button>
       </div>
       <div class="autocomplete" id="autocomplete"></div>
     </div>
 
     <nav class="mode-tabs">
-      <button class="mode-tab active" data-mode="quality" onclick="switchMode('quality')">📊 Quality Check</button>
-      <button class="mode-tab" data-mode="rumor" onclick="switchMode('rumor')">🔍 Rumor Buster</button>
-      <button class="mode-tab" data-mode="chat" onclick="switchMode('chat')">💬 Intelligence Chat</button>
+      <button class="mode-tab active" data-mode="quality" onclick="switchMode('quality')">Quality Analysis</button>
+      <button class="mode-tab" data-mode="rumor" onclick="switchMode('rumor')">Rumor Buster</button>
+      <button class="mode-tab" data-mode="chat" onclick="switchMode('chat')">Copilot Chat</button>
     </nav>
   </header>
 
@@ -703,21 +967,25 @@ input,textarea,select{font-family:var(--font);outline:none}
   <div class="mode-view active" id="view-quality">
     <!-- Empty State -->
     <div id="quality-empty" class="empty-state">
-      <div class="es-icon">📊</div>
-      <h2>Institutional Stock Screener</h2>
-      <p>Enter any stock ticker or company name above to generate audited quality metrics, solvency fortress testing, and cash flow authenticity verification.</p>
+      <div class="es-glyph">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>
+        </svg>
+      </div>
+      <h2>Institutional Stock Screener & Forensic Auditor</h2>
+      <p>Enter any stock ticker or company name above to generate audited quality metrics, green vs red flags, solvency fortress testing, and in-screen financial ledger inspection.</p>
       <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:20px">
-        <button class="rumor-chip" onclick="quickAnalyze('COCHINSHIP.NS')">🚢 Cochin Shipyard</button>
-        <button class="rumor-chip" onclick="quickAnalyze('BEL.NS')">🛡️ Bharat Electronics</button>
-        <button class="rumor-chip" onclick="quickAnalyze('RELIANCE.NS')">⚡ Reliance Industries</button>
-        <button class="rumor-chip" onclick="quickAnalyze('HDFCBANK.NS')">🏛️ HDFC Bank</button>
+        <button class="rumor-chip" onclick="quickAnalyze('COCHINSHIP.NS')">COCHINSHIP (Naval Compounder)</button>
+        <button class="rumor-chip" onclick="quickAnalyze('BEL.NS')">BEL (Defense Radar Monopoly)</button>
+        <button class="rumor-chip" onclick="quickAnalyze('RELIANCE.NS')">RELIANCE (Diversified Sovereign)</button>
+        <button class="rumor-chip" onclick="quickAnalyze('HDFCBANK.NS')">HDFCBANK (Private Banking)</button>
       </div>
     </div>
 
     <!-- Loading -->
     <div id="quality-loading" class="loading-overlay">
       <div class="spinner"></div>
-      <div class="loading-text">Extracting audited balance sheets & filings...</div>
+      <div class="loading-text">Extracting audited balance sheets & regulatory filings...</div>
     </div>
 
     <!-- Results -->
@@ -725,7 +993,36 @@ input,textarea,select{font-family:var(--font);outline:none}
       <!-- Stock Info Bar -->
       <div class="stock-info-bar" id="stock-info-bar"></div>
 
-      <!-- Score + Metrics -->
+      <!-- ════ HIGH-CONTRAST GREEN FLAGS VS RED FLAGS MATRIX ════ -->
+      <div class="flags-matrix-container">
+        <div class="flags-matrix-header">
+          <h3>
+            <span>Institutional Strengths vs Capital Risks Matrix</span>
+          </h3>
+          <span class="section-badge">Audited Cross-Examination</span>
+        </div>
+        <div class="flags-matrix-grid">
+          <!-- Green Flags Column -->
+          <div class="flag-matrix-card green-card">
+            <div class="fmc-top">
+              <span class="fmc-title">GREEN FLAGS (Institutional Strengths)</span>
+              <span class="fmc-count" id="green-flags-count">0 Detected</span>
+            </div>
+            <div class="fmc-list" id="green-flags-list"></div>
+          </div>
+
+          <!-- Red Flags Column -->
+          <div class="flag-matrix-card red-card">
+            <div class="fmc-top">
+              <span class="fmc-title">RED FLAGS (Critical Capital Risks)</span>
+              <span class="fmc-count" id="red-flags-count">0 Detected</span>
+            </div>
+            <div class="fmc-list" id="red-flags-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Score + Metrics Grid -->
       <div class="score-section">
         <div class="score-card" id="score-card">
           <div class="score-ring">
@@ -741,21 +1038,99 @@ input,textarea,select{font-family:var(--font);outline:none}
         <div class="metrics-grid" id="metrics-grid"></div>
       </div>
 
-      <!-- 🏛️ FORENSIC REALITY SUITE -->
+      <!-- FORENSIC REALITY SUITE -->
       <div class="forensic-suite">
-        <div class="section-header">🏛️ Forensic Reality Suite (Balance Sheet & Cash Authenticity)</div>
+        <div class="section-header">
+          <span>Forensic Reality Suite</span>
+          <span class="section-badge">Balance Sheet & Cash Authenticity</span>
+        </div>
         <div class="forensic-grid" id="forensic-grid"></div>
       </div>
 
-      <!-- 🧮 INTERACTIVE ORDER MARGIN & HYPE SIMULATOR -->
+      <!-- ════ IN-SCREEN DOCUMENT INSPECTOR & FINANCIAL LEDGER ════ -->
+      <div class="doc-inspector-section">
+        <div class="section-header">
+          <span>Document & Regulatory Filing Inspector</span>
+          <span class="section-badge">Direct In-Screen Verification</span>
+        </div>
+        <div class="doc-inspector-card">
+          <div class="doc-inspector-nav">
+            <button type="button" class="doc-tab-btn active" onclick="switchDocTab('ledger')">Audited Statements Ledger</button>
+            <button type="button" class="doc-tab-btn" onclick="switchDocTab('filings')">Official Regulatory PDFs & Filings</button>
+            <button type="button" class="doc-tab-btn" onclick="switchDocTab('announcements')">SEBI LODR Disclosures</button>
+          </div>
+
+          <!-- Tab 1: Ledger -->
+          <div class="doc-sub-view active" id="doc-view-ledger">
+            <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;justify-content:space-between">
+              <div style="font-size:0.8rem;color:var(--text-muted);font-weight:600">Multi-Year Audited Ledger (All Figures in ₹ Crores)</div>
+              <div style="display:flex;gap:6px">
+                <button type="button" class="sim-chip" onclick="showLedgerTable('bs')">Balance Sheet</button>
+                <button type="button" class="sim-chip" onclick="showLedgerTable('cf')">Cash Flow</button>
+                <button type="button" class="sim-chip" onclick="showLedgerTable('is')">Income Statement</button>
+              </div>
+            </div>
+            <div class="ledger-table-wrap" id="ledger-table-container"></div>
+          </div>
+
+          <!-- Tab 2: Regulatory PDFs -->
+          <div class="doc-sub-view" id="doc-view-filings">
+            <div class="filings-grid" id="filings-grid-container"></div>
+          </div>
+
+          <!-- Tab 3: Announcements -->
+          <div class="doc-sub-view" id="doc-view-announcements">
+            <div class="news-list" id="announcements-list">
+              <div style="color:var(--text-muted);font-size:.85rem;padding:12px">Loading verified exchange disclosures...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INTERACTIVE ORDER MARGIN & TIMELINE SIMULATOR -->
       <div class="order-simulator-box" id="order-simulator-box">
         <div class="sim-header">
-          <h3>🧮 Order Margin & Hype Simulator (Fundamental Margin Law)</h3>
-          <p>Test any contract headline against this company's audited Operating Profit Margin (OPM) and P/E ratio to compute true bottom-line earnings.</p>
+          <h3>Order Margin & Working Capital Simulator</h3>
+          <p>Test any contract headline against this company's audited Operating Profit Margin (OPM) and 9–12 month cash realization cycle.</p>
         </div>
+
+        <!-- 4-Phase Timeline Tracker -->
+        <div class="timeline-tracker">
+          <div class="timeline-tracker-title">
+            <span>4-Phase Commercial Realization Cycle</span>
+            <span>Total Duration: 9 to 12 Months</span>
+          </div>
+          <div class="timeline-stages">
+            <div class="stage-item">
+              <span class="stage-number">PHASE 01</span>
+              <span class="stage-name">Design Approval</span>
+              <span class="stage-timing">Months 1 – 2</span>
+              <span class="stage-desc">Technical drawings, milestone clearance & raw material procurement.</span>
+            </div>
+            <div class="stage-item">
+              <span class="stage-number">PHASE 02</span>
+              <span class="stage-name">Factory Fabrication</span>
+              <span class="stage-timing">Months 3 – 5</span>
+              <span class="stage-desc">Machining, assembly & plant capacity allocation.</span>
+            </div>
+            <div class="stage-item">
+              <span class="stage-number">PHASE 03</span>
+              <span class="stage-name">Client Delivery</span>
+              <span class="stage-timing">Month 6</span>
+              <span class="stage-desc">Factory dispatch, site installation & physical inspection certificate.</span>
+            </div>
+            <div class="stage-item">
+              <span class="stage-number">PHASE 04</span>
+              <span class="stage-name">Cash Realization</span>
+              <span class="stage-timing">Months 9 – 12</span>
+              <span class="stage-desc">Letter of Credit clearance & operating cash hits the bank balance sheet.</span>
+            </div>
+          </div>
+        </div>
+
         <div class="sim-controls">
           <div class="sim-slider-box">
-            <label>Contract / Headline Order Size (₹ Cr)</label>
+            <label>Headline Contract / Order Size (₹ Cr)</label>
             <input type="range" id="sim-slider" min="50" max="20000" step="50" value="1000" oninput="onSimSliderChange(this.value)">
           </div>
           <div class="sim-input-box">
@@ -777,15 +1152,21 @@ input,textarea,select{font-family:var(--font);outline:none}
         <div class="sim-diagnostic-callout" id="sim-diagnostic-callout"></div>
       </div>
 
-      <!-- Quality Checklist -->
+      <!-- Institutional 12-Point Checklist -->
       <div class="flags-section">
-        <div class="section-header">🚩 Institutional 12-Point Forensic Checklist</div>
+        <div class="section-header">
+          <span>Institutional 12-Point Forensic Checklist</span>
+          <span class="section-badge">Rule-Based Audit</span>
+        </div>
         <div class="flags-grid" id="flags-grid"></div>
       </div>
 
       <!-- Charts -->
       <div class="charts-section">
-        <div class="section-header">📈 Financial Health & Historical Trends</div>
+        <div class="section-header">
+          <span>Financial Health & Historical Compounding</span>
+          <span class="section-badge">Multi-Year Audited Trends</span>
+        </div>
         <div class="charts-grid">
           <div class="chart-box"><h4>Revenue vs Net Income (Annual ₹ Cr)</h4><canvas id="chart-revenue"></canvas></div>
           <div class="chart-box"><h4>Operating & Free Cash Flow (Annual ₹ Cr)</h4><canvas id="chart-cashflow"></canvas></div>
@@ -796,20 +1177,15 @@ input,textarea,select{font-family:var(--font);outline:none}
 
       <!-- AI Verdict -->
       <div class="verdict-section">
-        <div class="section-header">🤖 Institutional AI Dissection</div>
+        <div class="section-header">
+          <span>Quantitative AI Forensic Synthesis</span>
+          <span class="section-badge">Audited Unit Margins</span>
+        </div>
         <div class="verdict-box" id="verdict-box">
           <div class="verdict-loading">
             <div class="mini-spinner"></div>
-            Generating audited quantitative analysis...
+            Synthesizing audited quantitative analysis...
           </div>
-        </div>
-      </div>
-
-      <!-- News -->
-      <div class="news-section">
-        <div class="section-header">📰 Exchange Disclosures & News Feed</div>
-        <div class="news-list" id="news-list">
-          <div style="color:var(--text-muted);font-size:.9rem;padding:12px">Loading disclosures...</div>
         </div>
       </div>
     </div>
@@ -818,22 +1194,22 @@ input,textarea,select{font-family:var(--font);outline:none}
   <!-- ═══ RUMOR BUSTER MODE ═══ -->
   <div class="mode-view" id="view-rumor">
     <div class="rumor-input-box">
-      <h3>🔍 Rumor Buster Terminal</h3>
-      <p>Submit any stock tip, WhatsApp forward, or buyout claim. StockSight runs a 5-pillar forensic cross-examination against audited financials and SEBI exchange disclosures.</p>
+      <h3>Rumor Buster Terminal</h3>
+      <p>Submit any market rumor, WhatsApp tip, or contract claim. StockSight runs an institutional forensic cross-examination against audited financials, capacity limits, and SEBI exchange disclosures.</p>
       <textarea id="rumor-text" placeholder="e.g. 'Friend told me Cochin Shipyard got a ₹5000 Cr defense contract and is going to 3x' or 'Pine Labs shares gonna shoot before IPO'"></textarea>
       
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 18px">
-        <span style="font-size:0.76rem;color:var(--text-muted);display:flex;align-items:center;font-weight:600">Preset Archetypes:</span>
-        <button type="button" class="rumor-chip" onclick="setRumorPrompt('i was told pinelabs gonna shoot from 2 diff sources. what are the chances thats true', '')">🎯 Pine Labs (Pre-IPO Trap)</button>
-        <button type="button" class="rumor-chip" onclick="setRumorPrompt('cochin shipyard got ₹5,000 Cr naval defense contract, stock will double', 'COCHINSHIP')">🎯 Cochin Shipyard (Sovereign Moat)</button>
-        <button type="button" class="rumor-chip" onclick="setRumorPrompt('Bharat Electronics winning massive military radar order', 'BEL')">🎯 BEL (Defense Monopoly)</button>
-        <button type="button" class="rumor-chip" onclick="setRumorPrompt('Heard this small cap is getting a ₹5,000 Cr contract and will 3x', '')">🎯 ₹5,000 Cr Order Hype</button>
-        <button type="button" class="rumor-chip" onclick="setRumorPrompt('MNC conglomerate taking over company at 3x current market price', '')">🎯 3x Takeover Buyout</button>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 16px">
+        <span style="font-size:0.75rem;color:var(--text-muted);display:flex;align-items:center;font-weight:600">Preset Archetypes:</span>
+        <button type="button" class="rumor-chip" onclick="setRumorPrompt('i was told pinelabs gonna shoot from 2 diff sources. what are the chances thats true', '')">Pine Labs (Pre-IPO Trap)</button>
+        <button type="button" class="rumor-chip" onclick="setRumorPrompt('cochin shipyard got ₹5,000 Cr naval defense contract, stock will double', 'COCHINSHIP')">Cochin Shipyard (Naval Moat)</button>
+        <button type="button" class="rumor-chip" onclick="setRumorPrompt('Bharat Electronics winning massive military radar order', 'BEL')">BEL (Defense Monopoly)</button>
+        <button type="button" class="rumor-chip" onclick="setRumorPrompt('Heard this small cap is getting a ₹5,000 Cr contract and will 3x', '')">₹5,000 Cr Order Hype</button>
+        <button type="button" class="rumor-chip" onclick="setRumorPrompt('MNC conglomerate taking over company at 3x current market price', '')">3x Takeover Buyout</button>
       </div>
 
       <div class="rumor-row">
         <input id="rumor-ticker" placeholder="Stock ticker (optional, e.g. COCHINSHIP, BEL, RELIANCE)">
-        <button class="rumor-btn" id="rumor-btn" onclick="handleBustRumor()">🔍 Cross-Examine Claim</button>
+        <button class="rumor-btn" id="rumor-btn" onclick="handleBustRumor()">Cross-Examine Claim</button>
       </div>
     </div>
 
@@ -847,18 +1223,18 @@ input,textarea,select{font-family:var(--font);outline:none}
     <div class="chat-container">
       <div class="chat-header">
         <span class="dot"></span>
-        StockSight Copilot — Institutional Quantitative Equities Copilot. Strictly fact-based, no speculation.
+        StockSight Copilot — Institutional Quantitative Equities Copilot. Fact-based, zero speculation.
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;padding:10px 18px;border-bottom:1px solid var(--border);background:rgba(6,11,20,0.6)">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--border);background:rgba(6,11,20,0.6)">
         <span style="font-size:0.75rem;color:var(--text-muted);display:flex;align-items:center;font-weight:600">Institutional queries:</span>
-        <button type="button" class="rumor-chip" onclick="setChatPrompt('Analyze Pine Labs pre-IPO unlisted valuation, MDR economics and moat')">💡 Pine Labs Pre-IPO Analysis</button>
-        <button type="button" class="rumor-chip" onclick="setChatPrompt('Why is Bharat Electronics (BEL) considered a top sovereign defense compounder?')">💡 BEL Defense Moat</button>
-        <button type="button" class="rumor-chip" onclick="setChatPrompt('Explain Cochin Shipyard margin accretion math and 2020 entry valuation blueprint')">💡 Cochin Shipyard Margin Math</button>
-        <button type="button" class="rumor-chip" onclick="setChatPrompt('Explain the Acquirer Substitution Test for 3x buyout rumors')">💡 Acquirer Substitution Test</button>
-        <button type="button" class="rumor-chip" onclick="setChatPrompt('Compare Zomato vs Swiggy unit economics, contribution margins, and operating cash flows')">💡 Zomato vs Swiggy CFO</button>
+        <button type="button" class="rumor-chip" onclick="setChatPrompt('Analyze Pine Labs pre-IPO unlisted valuation, MDR economics and moat')">Pine Labs Pre-IPO Analysis</button>
+        <button type="button" class="rumor-chip" onclick="setChatPrompt('Why is Bharat Electronics (BEL) considered a top sovereign defense compounder?')">BEL Defense Moat</button>
+        <button type="button" class="rumor-chip" onclick="setChatPrompt('Explain Cochin Shipyard margin accretion math and 2020 entry valuation blueprint')">Cochin Shipyard Margin Math</button>
+        <button type="button" class="rumor-chip" onclick="setChatPrompt('Explain the Acquirer Substitution Test for 3x buyout rumors')">Acquirer Substitution Test</button>
+        <button type="button" class="rumor-chip" onclick="setChatPrompt('Compare Zomato vs Swiggy unit economics, contribution margins, and operating cash flows')">Zomato vs Swiggy CFO</button>
       </div>
       <div class="chat-messages" id="chat-messages">
-        <div class="chat-msg system">Type your inquiry below. You can interrogate any stock's unit margins, test market narratives, or compare capital allocation efficiency.</div>
+        <div class="chat-msg system">Type your inquiry below. You can interrogate any stock's unit margins, test market rumors, or examine balance sheet capital allocation.</div>
       </div>
       <div class="chat-input-row">
         <input type="text" id="chat-input" placeholder="Ask about any stock, valuation multiple, or balance sheet metric..." autocomplete="off">
@@ -873,13 +1249,41 @@ input,textarea,select{font-family:var(--font);outline:none}
   </div>
 </div>
 
+<!-- ════ IN-SCREEN DOCUMENT READER MODAL ════ -->
+<div class="doc-modal-overlay" id="doc-modal">
+  <div class="doc-modal-box">
+    <div class="doc-modal-header">
+      <div class="doc-modal-title-box">
+        <h3 id="doc-modal-title">Filing Document Viewer</h3>
+        <p id="doc-modal-sub">Direct Exchange Source</p>
+      </div>
+      <div class="doc-modal-controls">
+        <button class="btn-doc-modal" id="doc-modal-open-tab-btn" onclick="openDocModalInNewTab()">Open in New Tab</button>
+        <button class="btn-doc-close" onclick="closeDocModal()">Close (ESC)</button>
+      </div>
+    </div>
+    <div class="doc-modal-body">
+      <iframe class="doc-modal-iframe" id="doc-modal-iframe" src="about:blank"></iframe>
+      <div class="doc-modal-fallback" id="doc-modal-fallback">
+        <h4>External Security Notice</h4>
+        <p>This financial exchange or regulatory portal restricts direct in-page framing via security headers (X-Frame-Options / CSP). Click the button below to view the official document directly.</p>
+        <button class="btn-primary" onclick="openDocModalInNewTab()">Open Official Document in Secure Tab</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Settings FAB -->
-<button class="settings-btn" id="settings-btn" onclick="toggleSettings()" style="display:none" title="Terminal Settings">⚙️</button>
+<button class="settings-btn" id="settings-btn" onclick="toggleSettings()" style="display:none" title="Terminal Settings">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+  </svg>
+</button>
 
 <!-- Settings Modal -->
 <div class="modal-overlay" id="settings-modal">
   <div class="modal-box">
-    <h2>⚙️ Terminal Settings</h2>
+    <h2>Terminal Settings</h2>
     <div class="modal-group">
       <label>AI Analysis Engine</label>
       <select id="setting-model-pref">
@@ -893,7 +1297,7 @@ input,textarea,select{font-family:var(--font);outline:none}
     <div class="modal-group">
       <label>Gemini API Key</label>
       <input type="password" id="setting-api-key" placeholder="Enter Gemini API key (optional)...">
-      <small>Optional if using server-side key or local Ollama. Get free key at <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com</a></small>
+      <small>Optional if using server-side key or local Ollama.</small>
     </div>
     <div class="modal-actions">
       <button class="btn-ghost" onclick="toggleSettings()">Cancel</button>
@@ -908,7 +1312,7 @@ input,textarea,select{font-family:var(--font);outline:none}
 <script>
 /* ─── Constants ─── */
 const PW_HASH = '1c9eb9b744ebfdb15ef91bc5fea965287299bec90fd59f8393d581f3ddd2975a'; // sha256('ansh')
-const CIRC = 2 * Math.PI * 68; // score ring circumference
+const CIRC = 2 * Math.PI * 68;
 
 /* ─── State ─── */
 let currentStockData = null;
@@ -917,6 +1321,8 @@ let chatHistory = [];
 let chartInstances = {};
 let searchDebounce = null;
 let currentSimOrderCr = 1000;
+let currentModalDocUrl = '';
+let currentLedgerView = 'bs';
 
 /* ═══════════════════════════════════════════════════════════════
    PASSWORD GATE
@@ -1069,10 +1475,12 @@ async function handleAnalyze() {
     selectedSymbol = data.symbol;
 
     renderStockInfoBar(data);
+    renderFlagsMatrix(data);
     const scoreResult = calculateQualityScore(data);
     renderScore(scoreResult);
     renderMetrics(data);
     renderForensicSuite(data);
+    renderDocumentInspector(data);
     renderOrderSimulator(data);
     renderFlags(scoreResult.checks);
     renderCharts(data);
@@ -1086,16 +1494,229 @@ async function handleAnalyze() {
     document.getElementById('quality-loading').classList.remove('active');
     document.getElementById('quality-empty').style.display = 'flex';
     document.getElementById('quality-empty').innerHTML = `
-      <div class="es-icon">❌</div>
+      <div class="es-glyph">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>
+      </div>
       <h2>Stock Not Found or Data Unavailable</h2>
-      <p>${err.message}. Please verify the ticker (e.g. RELIANCE.NS, COCHINSHIP.NS, BEL.NS) and try again.</p>
+      <p>${err.message}. Please verify ticker format (e.g. RELIANCE.NS, COCHINSHIP.NS, BEL.NS) and try again.</p>
     `;
   }
   document.getElementById('search-btn').disabled = false;
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   SCORING ENGINE — Institutional 12-Point Forensic Checklist
+   STOCK INFO BAR WITH PRIOR RUN-UP AUDIT
+   ═══════════════════════════════════════════════════════════════ */
+function renderStockInfoBar(d) {
+  const change = d.currentPrice && d.previousClose ? ((d.currentPrice - d.previousClose) / d.previousClose * 100) : null;
+  const changeClass = change > 0 ? 'up' : change < 0 ? 'down' : '';
+  
+  let runUpHTML = '';
+  if (d.priceChange5d != null) {
+    const isFrontRun = d.priceChange5d > 15;
+    runUpHTML += `<span class="sib-runup-badge ${isFrontRun ? 'alert' : ''}">5D: ${d.priceChange5d > 0 ? '+' : ''}${d.priceChange5d.toFixed(1)}%</span>`;
+  }
+  if (d.priceChange15d != null) {
+    runUpHTML += `<span class="sib-runup-badge">15D: ${d.priceChange15d > 0 ? '+' : ''}${d.priceChange15d.toFixed(1)}%</span>`;
+  }
+
+  document.getElementById('stock-info-bar').innerHTML = `
+    <span class="sib-name">${d.name || d.symbol}</span>
+    <span class="sib-sym">${d.symbol} · ${d.exchange || 'NSE/BSE'}</span>
+    <span class="sib-detail">${d.sector ? d.sector + ' · ' + (d.industry || '') : ''}</span>
+    ${runUpHTML}
+    <span class="sib-price">₹${fmtNum(d.currentPrice)}</span>
+    ${change != null ? `<span class="sib-change ${changeClass}">${change > 0 ? '+' : ''}${change.toFixed(2)}%</span>` : ''}
+    <span class="sib-detail">MCap: ₹${fmtCrJS(d.marketCap)}</span>
+  `;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   GREEN FLAGS VS RED FLAGS MATRIX ENGINE
+   ═══════════════════════════════════════════════════════════════ */
+function renderFlagsMatrix(d) {
+  const greenFlags = [];
+  const redFlags = [];
+
+  const cash = d.totalCash || 0;
+  const debt = d.totalDebt || 0;
+  const netCash = cash - debt;
+  const ocf = d.operatingCashFlow;
+  const ni = d.financials?.income?.length ? d.financials.income[d.financials.income.length - 1]?.netIncome : null;
+  const opm = d.operatingMargin;
+  const de = d.debtToEquity;
+  const roe = d.returnOnEquity;
+  const ih = d.insiderHolding;
+  const mcr = d.marketCapToRevenue;
+  const pe = d.pe;
+  const revCAGR = d.revenueCAGR;
+  const price5d = d.priceChange5d;
+
+  const latestCF = d.financials?.cashFlow?.length ? d.financials.cashFlow[d.financials.cashFlow.length - 1] : null;
+  const capex = latestCF?.capitalExpenditure ? Math.abs(latestCF.capitalExpenditure) : 0;
+  const rev = d.totalRevenue || 0;
+  const capexIntensity = (rev > 0 && capex > 0) ? (capex / rev) * 100 : null;
+
+  // 1. Solvency & Net Cash
+  if (netCash > 0 && debt === 0) {
+    greenFlags.push({
+      badge: '[NET CASH FORTRESS]',
+      text: `Zero Borrowings with ₹${fmtCrJS(cash)} in Liquid Reserves`,
+      sub: 'Company operates with zero debt overhang and is 100% immune to interest rate hikes and credit contractions.'
+    });
+  } else if (netCash > 0) {
+    greenFlags.push({
+      badge: '[POSITIVE NET CASH]',
+      text: `₹${fmtCrJS(netCash)} Net Cash Balance (Cash ₹${fmtCrJS(cash)} > Debt ₹${fmtCrJS(debt)})`,
+      sub: 'Liquid treasury and bank balances comfortably exceed total debt obligations.'
+    });
+  } else if (netCash < 0 && de != null && de > 1.2) {
+    redFlags.push({
+      badge: '[OVERLEVERAGED BALANCE SHEET]',
+      text: `Net Debt Burden of ₹${fmtCrJS(Math.abs(netCash))} (D/E: ${de.toFixed(2)})`,
+      sub: 'Debt significantly exceeds cash buffers. Elevated debt-service costs erode shareholder free cash.'
+    });
+  }
+
+  // 2. Cash Flow Authenticity (CFO vs Net Income)
+  if (ocf != null && ni != null && ni > 0) {
+    const conversion = (ocf / ni) * 100;
+    if (conversion >= 90) {
+      greenFlags.push({
+        badge: '[100%+ CASH CONVERSION]',
+        text: `CFO Converts at ${conversion.toFixed(0)}% of Reported Net Profit`,
+        sub: `Reported profit of ₹${fmtCrJS(ni)} yielded ₹${fmtCrJS(ocf)} in actual operating cash. Highly authentic earnings.`
+      });
+    } else if (conversion < 55) {
+      redFlags.push({
+        badge: '[ACCRUALS / RECEIVABLES DRAG]',
+        text: `Only ${conversion.toFixed(0)}% of Profits Converted to Cash (CFO ₹${fmtCrJS(ocf)} vs PAT ₹${fmtCrJS(ni)})`,
+        sub: 'Critical disconnect: Over 45% of reported profits are stuck in uncollected customer invoices or unsold inventory.'
+      });
+    }
+  } else if (ocf != null && ocf < 0) {
+    redFlags.push({
+      badge: '[NEGATIVE OPERATING CASH FLOW]',
+      text: `Core Operations Burned -₹${fmtCrJS(Math.abs(ocf))} in Cash`,
+      sub: 'The business model is draining cash rather than generating it from operations.'
+    });
+  }
+
+  // 3. Operating Profit Margin (Pricing Power)
+  if (opm != null) {
+    if (opm > 20) {
+      greenFlags.push({
+        badge: '[PRICING POWER & HIGH OPM]',
+        text: `Audited Operating Margin of ${opm.toFixed(1)}%`,
+        sub: 'High unit economics and competitive moat allow the company to absorb raw material inflation and maintain margins.'
+      });
+    } else if (opm < 6 && opm > 0) {
+      redFlags.push({
+        badge: '[RAZOR-THIN OPERATING MARGIN]',
+        text: `OPM is Only ${opm.toFixed(1)}% — Vulnerable to Margin Shock`,
+        sub: 'A ₹1,000 Cr contract creates less than ₹60 Cr pre-tax profit. Any cost overruns can flip contracts into losses.'
+      });
+    } else if (opm <= 0) {
+      redFlags.push({
+        badge: '[NEGATIVE OPERATING MARGIN]',
+        text: `Operating Loss with OPM of ${opm.toFixed(1)}%`,
+        sub: 'Company loses money on every rupee of sales before interest and taxes.'
+      });
+    }
+  }
+
+  // 4. Physical Capacity & Capex Runway
+  if (capexIntensity != null) {
+    if (capexIntensity >= 10) {
+      greenFlags.push({
+        badge: '[ACTIVE FACTORY EXPANSION]',
+        text: `Reinvested ₹${fmtCrJS(capex)} (${capexIntensity.toFixed(1)}% of Revenue) in Capex`,
+        sub: 'Pre-existing balance sheet investment in physical plants ensures capacity exists to fulfill future order books.'
+      });
+    } else if (capexIntensity < 3 && rev > 500e7) {
+      redFlags.push({
+        badge: '[PHYSICAL CAPACITY BOTTLENECK]',
+        text: `Low Capex Reinvestment (${capexIntensity.toFixed(1)}% of Sales)`,
+        sub: 'Cannot fulfill massive 3x–5x contract surges without entering a costly, multi-year 3–5 year factory setup cycle.'
+      });
+    }
+  }
+
+  // 5. Front-Running Detection (Prior Price Action)
+  if (price5d != null && price5d > 15) {
+    redFlags.push({
+      badge: '[FRONT-RUNNING ACCUMULATION]',
+      text: `Abnormal +${price5d.toFixed(1)}% Run-Up in Prior 5 Days`,
+      sub: 'Operators and insiders accumulated quietly before public news. Retail entering now faces distribution trap risk.'
+    });
+  }
+
+  // 6. Valuation Sanity
+  if (mcr != null && mcr > 12) {
+    redFlags.push({
+      badge: '[VALUATION MULTIPLE STRETCH]',
+      text: `Trading at ${mcr.toFixed(1)}x Annual Sales Multiple`,
+      sub: 'Valuation is pricing in perfection and multi-year flawless delivery. Extremely sensitive to quarterly misses.'
+    });
+  } else if (mcr != null && mcr < 2.5 && pe != null && pe < 20) {
+    greenFlags.push({
+      badge: '[HIGH VALUATION SAFETY]',
+      text: `Priced at ${mcr.toFixed(1)}x Revenue & ${pe.toFixed(1)}x P/E`,
+      sub: 'Conservative valuation multiples provide substantial downside protection against broader market pullbacks.'
+    });
+  }
+
+  // 7. ROE & Compounding
+  if (roe != null && roe > 18) {
+    greenFlags.push({
+      badge: '[SUPERIOR CAPITAL COMPOUNDER]',
+      text: `Return on Equity of ${roe.toFixed(1)}%`,
+      sub: 'Management allocates retained earnings efficiently, generating high returns on shareholder equity.'
+    });
+  }
+
+  // 8. Promoter Alignment
+  if (ih != null && ih > 55) {
+    greenFlags.push({
+      badge: '[HIGH PROMOTER SKIN IN THE GAME]',
+      text: `Insiders / Promoters Own ${ih.toFixed(1)}% of the Company`,
+      sub: 'High promoter ownership aligns executive incentives directly with long-term shareholder wealth creation.'
+    });
+  }
+
+  // Render Green Flags
+  document.getElementById('green-flags-count').textContent = `${greenFlags.length} Detected`;
+  document.getElementById('green-flags-list').innerHTML = greenFlags.length ? greenFlags.map(f => `
+    <div class="fmc-item">
+      <div class="fmc-item-badge">${f.badge}</div>
+      <div class="fmc-item-text">${f.text}</div>
+      <div class="fmc-item-sub">${f.sub}</div>
+    </div>
+  `).join('') : `
+    <div class="fmc-item" style="color:var(--text-muted);font-style:italic">
+      No standout institutional moat characteristics detected on current audited metrics.
+    </div>
+  `;
+
+  // Render Red Flags
+  document.getElementById('red-flags-count').textContent = `${redFlags.length} Detected`;
+  document.getElementById('red-flags-list').innerHTML = redFlags.length ? redFlags.map(f => `
+    <div class="fmc-item">
+      <div class="fmc-item-badge">${f.badge}</div>
+      <div class="fmc-item-text">${f.text}</div>
+      <div class="fmc-item-sub">${f.sub}</div>
+    </div>
+  `).join('') : `
+    <div class="fmc-item" style="color:var(--text-muted);font-style:italic">
+      [CLEAR PASS] No critical capital risks, receivables drag, or front-running anomalies flagged.
+    </div>
+  `;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SCORING ENGINE — 12-Point Forensic Checklist
    ═══════════════════════════════════════════════════════════════ */
 function calculateQualityScore(d) {
   const checks = [];
@@ -1193,7 +1814,7 @@ function calculateQualityScore(d) {
   totalScore += s6;
 
   // 7. Promoter Pledge (8 pts)
-  checks.push({ name: 'Promoter Pledge', score: 0, max: 8, status: 'na', detail: 'Inspect latest quarterly BSE/NSE shareholding disclosures for pledge %.' });
+  checks.push({ name: 'Promoter Pledge', score: 0, max: 8, status: 'na', detail: 'Inspect quarterly BSE/NSE shareholding disclosures for pledge %.' });
 
   // 8. ROE Capital Efficiency (8 pts)
   const roe = d.returnOnEquity;
@@ -1212,7 +1833,7 @@ function calculateQualityScore(d) {
   checks.push({ name: 'Auditor Quality', score: 0, max: 5, status: 'na', detail: 'Verify statutory auditor resignation history in Annual Report Annexures.' });
 
   // 10. Business Model Continuity (5 pts)
-  checks.push({ name: 'Business Model Continuity', score: 0, max: 5, status: 'na', detail: 'Examine corporate charter to ensure company does not pivot to trending buzzwords.' });
+  checks.push({ name: 'Business Model Continuity', score: 0, max: 5, status: 'na', detail: 'Verify corporate charter ensures company adheres to core competence.' });
 
   // 11. Trading Volume Sanity (6 pts)
   const vs = d.volumeSpike;
@@ -1243,30 +1864,14 @@ function calculateQualityScore(d) {
 }
 
 function getGrade(score) {
-  if (score >= 90) return { letter: 'A+', label: 'Sovereign Quality', color: '#10b981' };
+  if (score >= 90) return { letter: 'A+', label: 'Sovereign Fortress', color: '#10b981' };
   if (score >= 80) return { letter: 'A', label: 'Institutional Grade', color: '#22c55e' };
   if (score >= 70) return { letter: 'B+', label: 'High Quality', color: '#4ade80' };
-  if (score >= 60) return { letter: 'B', label: 'Acceptable', color: '#84cc16' };
-  if (score >= 50) return { letter: 'C', label: 'Average Quality', color: '#eab308' };
-  if (score >= 40) return { letter: 'D', label: 'High Vulnerability', color: '#f97316' };
+  if (score >= 60) return { letter: 'B', label: 'Acceptable Quality', color: '#84cc16' };
+  if (score >= 50) return { letter: 'C', label: 'Average Compounder', color: '#eab308' };
+  if (score >= 40) return { letter: 'D', label: 'High Capital Vulnerability', color: '#f97316' };
   if (score >= 30) return { letter: 'E', label: 'Distressed / Speculative', color: '#ef4444' };
-  return { letter: 'F', label: 'Avoid / High Risk', color: '#dc2626' };
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   RENDER QUALITY VIEW COMPONENTS
-   ═══════════════════════════════════════════════════════════════ */
-function renderStockInfoBar(d) {
-  const change = d.currentPrice && d.previousClose ? ((d.currentPrice - d.previousClose) / d.previousClose * 100) : null;
-  const changeClass = change > 0 ? 'up' : change < 0 ? 'down' : '';
-  document.getElementById('stock-info-bar').innerHTML = `
-    <span class="sib-name">${d.name || d.symbol}</span>
-    <span class="sib-sym">${d.symbol} · ${d.exchange || 'NSE/BSE'}</span>
-    <span class="sib-detail">${d.sector ? d.sector + ' · ' + (d.industry || '') : ''}</span>
-    <span class="sib-price">₹${fmtNum(d.currentPrice)}</span>
-    ${change != null ? `<span class="sib-change ${changeClass}">${change > 0 ? '+' : ''}${change.toFixed(2)}%</span>` : ''}
-    <span class="sib-detail">MCap: ₹${fmtCrJS(d.marketCap)}</span>
-  `;
+  return { letter: 'F', label: 'Avoid / Operator Trap', color: '#dc2626' };
 }
 
 function renderScore(r) {
@@ -1287,15 +1892,15 @@ function renderMetrics(d) {
     { label: 'Market Cap', value: '₹' + fmtCrJS(d.marketCap) },
     { label: 'P/E Multiple', value: fmtNum(d.pe), sub: d.forwardPE ? 'Fwd: ' + fmtNum(d.forwardPE) + 'x' : null },
     { label: 'Price-to-Book', value: fmtNum(d.pb) },
-    { label: 'Annual Revenue', value: '₹' + fmtCrJS(d.totalRevenue), sub: d.revenueGrowth != null ? (d.revenueGrowth > 0 ? '↑' : '↓') + Math.abs(d.revenueGrowth).toFixed(1) + '% YoY' : null, subClass: d.revenueGrowth > 0 ? 'up' : 'down' },
+    { label: 'Annual Revenue', value: '₹' + fmtCrJS(d.totalRevenue), sub: d.revenueGrowth != null ? (d.revenueGrowth > 0 ? '+' : '') + d.revenueGrowth.toFixed(1) + '% YoY' : null, subClass: d.revenueGrowth > 0 ? 'up' : 'down' },
     { label: 'Operating Margin', value: d.operatingMargin != null ? d.operatingMargin.toFixed(1) + '%' : 'N/A' },
     { label: 'Return on Equity', value: d.returnOnEquity != null ? d.returnOnEquity.toFixed(1) + '%' : 'N/A' },
     { label: 'Debt to Equity', value: d.debtToEquity != null ? d.debtToEquity.toFixed(2) : 'N/A' },
     { label: 'Free Cash Flow', value: '₹' + fmtCrJS(d.freeCashFlow) },
+    { label: '5-Day Run-Up', value: d.priceChange5d != null ? (d.priceChange5d > 0 ? '+' : '') + d.priceChange5d.toFixed(1) + '%' : 'N/A', subClass: d.priceChange5d > 15 ? 'down' : 'neutral' },
+    { label: '15-Day Run-Up', value: d.priceChange15d != null ? (d.priceChange15d > 0 ? '+' : '') + d.priceChange15d.toFixed(1) + '%' : 'N/A' },
     { label: '52W High / Low', value: '₹' + fmtNum(d.fiftyTwoWeekHigh) + ' / ₹' + fmtNum(d.fiftyTwoWeekLow) },
-    { label: 'Dividend Yield', value: d.dividendYield != null ? d.dividendYield.toFixed(2) + '%' : 'N/A' },
-    { label: 'Insider Holding', value: d.insiderHolding != null ? d.insiderHolding.toFixed(1) + '%' : 'N/A' },
-    { label: 'Workforce', value: d.employees ? d.employees.toLocaleString('en-IN') : 'N/A' },
+    { label: 'Insider Holding', value: d.insiderHolding != null ? d.insiderHolding.toFixed(1) + '%' : 'N/A' }
   ];
 
   document.getElementById('metrics-grid').innerHTML = m.map(x => `
@@ -1307,7 +1912,7 @@ function renderMetrics(d) {
   `).join('');
 }
 
-/* ─── Render Forensic Reality Suite (Solvency, Cash Conversion, Capex) ─── */
+/* ─── Forensic Reality Suite (Solvency, Cash Conversion, Capex) ─── */
 function renderForensicSuite(d) {
   const grid = document.getElementById('forensic-grid');
   const isBank = (d.sector || '').toLowerCase().includes('financial') || (d.industry || '').toLowerCase().includes('bank');
@@ -1317,22 +1922,22 @@ function renderForensicSuite(d) {
   const debt = d.totalDebt || 0;
   const netCash = cash - debt;
   let solvencyStatus = 'pass';
-  let solvencyLabel = '🟢 Net Cash Fortress';
+  let solvencyLabel = '[NET CASH FORTRESS]';
   let solvencyInsight = `Holds ₹${fmtCrJS(cash)} in liquid cash against ₹${fmtCrJS(debt)} total debt. Zero solvency vulnerability.`;
 
   if (isBank) {
-    solvencyLabel = '🏛️ Banking Balance Sheet';
-    solvencyInsight = `Bank leverage model: Customer deposits of ₹${fmtCrJS(debt)} deployed across diversified loan book.`;
+    solvencyLabel = '[BANKING MODEL]';
+    solvencyInsight = `Commercial bank structure: Customer deposits of ₹${fmtCrJS(debt)} deployed across diversified lending book.`;
     solvencyStatus = 'pass';
   } else if (netCash < 0) {
     if (d.debtToEquity != null && d.debtToEquity > 1.2) {
       solvencyStatus = 'fail';
-      solvencyLabel = '🔴 Debt Heavy Alert';
-      solvencyInsight = `Total debt of ₹${fmtCrJS(debt)} exceeds cash reserves by ₹${fmtCrJS(Math.abs(netCash))}. Sensitive to rate hikes.`;
+      solvencyLabel = '[DEBT HEAVY ALERT]';
+      solvencyInsight = `Total debt of ₹${fmtCrJS(debt)} exceeds cash reserves by ₹${fmtCrJS(Math.abs(netCash))}. High interest rate vulnerability.`;
     } else {
       solvencyStatus = 'warn';
-      solvencyLabel = '🟡 Leveraged Operation';
-      solvencyInsight = `Net debt is ₹${fmtCrJS(Math.abs(netCash))}. Debt is serviceable but requires monitoring.`;
+      solvencyLabel = '[LEVERAGED OPERATION]';
+      solvencyInsight = `Net debt is ₹${fmtCrJS(Math.abs(netCash))}. Debt is serviceable but demands continuous cash monitoring.`;
     }
   }
 
@@ -1342,28 +1947,28 @@ function renderForensicSuite(d) {
   const ocf = d.operatingCashFlow;
   const ni = d.financials?.income?.length ? d.financials.income[d.financials.income.length - 1]?.netIncome : null;
   let cashStatus = 'warn';
-  let cashLabel = '🟡 Moderate Conversion';
+  let cashLabel = '[MODERATE CONVERSION]';
   let conversionPct = 0;
-  let cashInsight = 'Cash conversion metrics awaiting latest complete statement disclosure.';
+  let cashInsight = 'Cash conversion metrics awaiting latest complete annual statement disclosure.';
 
   if (ocf != null && ni != null && ni !== 0) {
     conversionPct = Math.round((ocf / Math.abs(ni)) * 100);
     if (conversionPct >= 90) {
       cashStatus = 'pass';
-      cashLabel = '🟢 100%+ Real Cash Generated';
-      cashInsight = `Reported ₹${fmtCrJS(ni)} profit generated ₹${fmtCrJS(ocf)} in actual bank cash (${conversionPct}% conversion). High authenticity.`;
+      cashLabel = '[100%+ REAL CASH GENERATED]';
+      cashInsight = `Reported ₹${fmtCrJS(ni)} profit generated ₹${fmtCrJS(ocf)} in cold bank cash (${conversionPct}% conversion). Zero accounting fluff.`;
     } else if (conversionPct >= 55) {
       cashStatus = 'warn';
-      cashLabel = `🟡 ${conversionPct}% Cash Conversion`;
+      cashLabel = `[${conversionPct}% CASH CONVERSION]`;
       cashInsight = `CFO is ₹${fmtCrJS(ocf)} vs ₹${fmtCrJS(ni)} reported profit. Portion trapped in uncollected receivables or inventory.`;
     } else {
       cashStatus = 'fail';
-      cashLabel = `🔴 ${conversionPct}% Accruals Drag`;
+      cashLabel = `[${conversionPct}% ACCRUALS DRAG]`;
       cashInsight = `Severe disconnect! CFO is only ₹${fmtCrJS(ocf)} against reported profit of ₹${fmtCrJS(ni)}. Risk of paper profits.`;
     }
   } else if (ocf != null) {
     cashStatus = ocf > 0 ? 'pass' : 'fail';
-    cashLabel = ocf > 0 ? '🟢 Positive Operating Cash' : '🔴 Negative Cash Flow';
+    cashLabel = ocf > 0 ? '[POSITIVE OPERATING CASH]' : '[NEGATIVE CASH FLOW]';
     cashInsight = `Operating Cash Flow: ₹${fmtCrJS(ocf)}.`;
     conversionPct = ocf > 0 ? 80 : 20;
   }
@@ -1374,25 +1979,25 @@ function renderForensicSuite(d) {
   const rev = d.totalRevenue || 0;
   let capexIntensity = (capex && rev > 0) ? ((capex / rev) * 100) : null;
   let capexStatus = 'pass';
-  let capexLabel = '🟢 Active Expansion';
+  let capexLabel = '[ACTIVE EXPANSION]';
   let capexInsight = 'Annual capex reinvestment expands physical plant and equipment capacity to execute order backlogs.';
 
   if (capexIntensity != null) {
     if (capexIntensity > 10) {
       capexStatus = 'pass';
-      capexLabel = `🟢 High Capex (${capexIntensity.toFixed(1)}%)`;
+      capexLabel = `[HIGH CAPEX: ${capexIntensity.toFixed(1)}%]`;
       capexInsight = `Reinvested ₹${fmtCrJS(capex)} into physical assets (${capexIntensity.toFixed(1)}% of revenue) to fuel upcoming growth cycles.`;
     } else if (capexIntensity > 4) {
       capexStatus = 'warn';
-      capexLabel = `🟡 Moderate Capex (${capexIntensity.toFixed(1)}%)`;
+      capexLabel = `[MODERATE CAPEX: ${capexIntensity.toFixed(1)}%]`;
       capexInsight = `Capex of ₹${fmtCrJS(capex)} covers ongoing equipment maintenance and moderate capacity runway.`;
     } else {
       capexStatus = 'warn';
-      capexLabel = `⚪ Low Capex Intensity (${capexIntensity.toFixed(1)}%)`;
+      capexLabel = `[LOW CAPEX: ${capexIntensity.toFixed(1)}%]`;
       capexInsight = `Capex is ₹${fmtCrJS(capex)} (${capexIntensity.toFixed(1)}% of sales). Asset-light or limited factory expansion.`;
     }
   } else if (capex != null) {
-    capexLabel = `₹${fmtCrJS(capex)} Annual Capex`;
+    capexLabel = `[₹${fmtCrJS(capex)} ANNUAL CAPEX]`;
     capexInsight = `Capital expenditure of ₹${fmtCrJS(capex)} deployed during last fiscal year.`;
   }
 
@@ -1459,7 +2064,221 @@ function renderForensicSuite(d) {
   `;
 }
 
-/* ─── Render Interactive Order Simulator ─── */
+/* ═══════════════════════════════════════════════════════════════
+   IN-SCREEN DOCUMENT INSPECTOR & AUDITED STATEMENTS LEDGER
+   ═══════════════════════════════════════════════════════════════ */
+function renderDocumentInspector(d) {
+  showLedgerTable('bs');
+  renderFilingsGrid(d);
+}
+
+function switchDocTab(tabName) {
+  document.querySelectorAll('.doc-tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.doc-sub-view').forEach(v => v.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('doc-view-' + tabName).classList.add('active');
+}
+
+function showLedgerTable(type) {
+  currentLedgerView = type;
+  const container = document.getElementById('ledger-table-container');
+  const fin = currentStockData?.financials;
+  if (!fin) {
+    container.innerHTML = '<div style="padding:16px;color:var(--text-muted)">Financial statements history not available.</div>';
+    return;
+  }
+
+  if (type === 'bs') {
+    const bs = fin.balanceSheet || [];
+    if (!bs.length) { container.innerHTML = '<div style="padding:16px;color:var(--text-muted)">Balance Sheet statements unavailable.</div>'; return; }
+    const years = bs.map(b => b.date ? b.date.substring(0, 4) : 'N/A');
+
+    container.innerHTML = `
+      <table class="ledger-table">
+        <thead>
+          <tr>
+            <th>Balance Sheet Metric (₹ Cr)</th>
+            ${years.map(y => `<th>FY ${y}</th>`).join('')}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Cash & Liquid Reserves</td>
+            ${bs.map(b => `<td class="highlight-green">₹${fmtCrJS(b.cash)}</td>`).join('')}
+          </tr>
+          <tr>
+            <td>Total Borrowings / Debt</td>
+            ${bs.map(b => `<td class="${b.totalDebt > 0 ? 'highlight-red' : ''}">₹${fmtCrJS(b.totalDebt)}</td>`).join('')}
+          </tr>
+          <tr>
+            <td>Net Cash / (Net Debt)</td>
+            ${bs.map(b => `<td class="${b.netCash >= 0 ? 'highlight-green' : 'highlight-red'}">₹${fmtCrJS(b.netCash)}</td>`).join('')}
+          </tr>
+          <tr>
+            <td>Shareholder Equity</td>
+            ${bs.map(b => `<td>₹${fmtCrJS(b.totalEquity)}</td>`).join('')}
+          </tr>
+          <tr>
+            <td>Total Assets</td>
+            ${bs.map(b => `<td>₹${fmtCrJS(b.totalAssets)}</td>`).join('')}
+          </tr>
+        </tbody>
+      </table>
+    `;
+  } else if (type === 'cf') {
+    const cf = fin.cashFlow || [];
+    if (!cf.length) { container.innerHTML = '<div style="padding:16px;color:var(--text-muted)">Cash Flow statements unavailable.</div>'; return; }
+    const years = cf.map(c => c.date ? c.date.substring(0, 4) : 'N/A');
+
+    container.innerHTML = `
+      <table class="ledger-table">
+        <thead>
+          <tr>
+            <th>Cash Flow Metric (₹ Cr)</th>
+            ${years.map(y => `<th>FY ${y}</th>`).join('')}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Cash from Operations (CFO)</td>
+            ${cf.map(c => `<td class="${c.operatingCashFlow >= 0 ? 'highlight-green' : 'highlight-red'}">₹${fmtCrJS(c.operatingCashFlow)}</td>`).join('')}
+          </tr>
+          <tr>
+            <td>Capital Expenditure (Capex)</td>
+            ${cf.map(c => `<td>₹${fmtCrJS(c.capitalExpenditure ? Math.abs(c.capitalExpenditure) : 0)}</td>`).join('')}
+          </tr>
+          <tr>
+            <td>Free Cash Flow (FCF)</td>
+            ${cf.map(c => `<td class="${c.freeCashFlow >= 0 ? 'highlight-green' : 'highlight-red'}">₹${fmtCrJS(c.freeCashFlow)}</td>`).join('')}
+          </tr>
+        </tbody>
+      </table>
+    `;
+  } else if (type === 'is') {
+    const is = fin.income || [];
+    if (!is.length) { container.innerHTML = '<div style="padding:16px;color:var(--text-muted)">Income statements unavailable.</div>'; return; }
+    const years = is.map(i => i.date ? i.date.substring(0, 4) : 'N/A');
+
+    container.innerHTML = `
+      <table class="ledger-table">
+        <thead>
+          <tr>
+            <th>Income Statement Metric (₹ Cr)</th>
+            ${years.map(y => `<th>FY ${y}</th>`).join('')}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Total Annual Revenue</td>
+            ${is.map(i => `<td>₹${fmtCrJS(i.revenue)}</td>`).join('')}
+          </tr>
+          <tr>
+            <td>Operating Margin (OPM %)</td>
+            ${is.map(i => `<td class="${(i.opm || 0) > 15 ? 'highlight-green' : ''}">${i.opm != null ? i.opm.toFixed(1) + '%' : 'N/A'}</td>`).join('')}
+          </tr>
+          <tr>
+            <td>Net Profit After Tax</td>
+            ${is.map(i => `<td class="${(i.netIncome || 0) >= 0 ? 'highlight-green' : 'highlight-red'}">₹${fmtCrJS(i.netIncome)}</td>`).join('')}
+          </tr>
+        </tbody>
+      </table>
+    `;
+  }
+}
+
+function renderFilingsGrid(d) {
+  const docs = d.documents || {};
+  const cleanTicker = d.cleanTicker || d.symbol.replace('.NS', '').replace('.BO', '');
+
+  const filings = [
+    {
+      title: 'BSE Corporate Filings & Shareholding',
+      desc: 'Official BSE disclosures, quarterly financial statements, and board resolutions.',
+      url: docs.bseUrl || `https://www.bseindia.com/stock-share-price/${cleanTicker}/`
+    },
+    {
+      title: 'NSE Equity Announcements',
+      desc: 'SEBI Regulation 30 disclosures, bulk deals, insider trades, and investor updates.',
+      url: docs.nseUrl || `https://www.nseindia.com/get-quotes/equity?symbol=${cleanTicker}`
+    },
+    {
+      title: 'Screener Consolidated Ledger',
+      desc: '10-year consolidated audited balance sheets, cash flows, and peer margin comparisons.',
+      url: docs.screenerUrl || `https://www.screener.in/company/${cleanTicker}/consolidated/`
+    },
+    {
+      title: 'Audited Annual Report Archive',
+      desc: 'Complete statutory auditor notes, contingent liabilities, and director reports.',
+      url: docs.annualReportSearch || `https://www.google.com/search?q=${encodeURIComponent(cleanTicker + ' Annual Report filetype:pdf')}`
+    },
+    {
+      title: 'Investor Presentation & Earnings Transcript',
+      desc: 'Management guidance on factory capex runway, order book pipeline, and unit economics.',
+      url: docs.investorPresentationSearch || `https://www.google.com/search?q=${encodeURIComponent(cleanTicker + ' Investor Presentation filetype:pdf')}`
+    }
+  ];
+
+  document.getElementById('filings-grid-container').innerHTML = filings.map(f => `
+    <div class="filing-card">
+      <div class="filing-info">
+        <h4>${f.title}</h4>
+        <p>${f.desc}</p>
+      </div>
+      <div class="filing-actions">
+        <button class="btn-doc-preview" onclick="openDocModal('${esc(f.url)}', '${esc(f.title)}')">Preview In-Screen</button>
+        <button class="btn-doc-direct" onclick="window.open('${esc(f.url)}', '_blank', 'noopener,noreferrer')">Direct Tab</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ─── In-Screen Document Modal Controls ─── */
+function openDocModal(url, title) {
+  currentModalDocUrl = url;
+  document.getElementById('doc-modal-title').textContent = title;
+  document.getElementById('doc-modal-sub').textContent = url;
+  const iframe = document.getElementById('doc-modal-iframe');
+  const fallback = document.getElementById('doc-modal-fallback');
+
+  iframe.style.display = 'block';
+  fallback.style.display = 'none';
+  iframe.src = url;
+
+  // Handle cross-origin iframe security fallback
+  const timer = setTimeout(() => {
+    try {
+      if (!iframe.contentWindow || iframe.contentWindow.location.href === 'about:blank') {
+        iframe.style.display = 'none';
+        fallback.style.display = 'flex';
+      }
+    } catch(e) {
+      // CORS expected; let iframe render if possible
+    }
+  }, 2500);
+
+  document.getElementById('doc-modal').classList.add('active');
+}
+
+function closeDocModal() {
+  document.getElementById('doc-modal').classList.remove('active');
+  document.getElementById('doc-modal-iframe').src = 'about:blank';
+}
+
+function openDocModalInNewTab() {
+  if (currentModalDocUrl) {
+    window.open(currentModalDocUrl, '_blank', 'noopener,noreferrer');
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('doc-modal').classList.contains('active')) {
+    closeDocModal();
+  }
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   ORDER MARGIN & TIMELINE SIMULATOR
+   ═══════════════════════════════════════════════════════════════ */
 function renderOrderSimulator(d) {
   updateOrderSimulator();
 }
@@ -1487,11 +2306,20 @@ function updateOrderSimulator() {
   const d = currentStockData;
   const opm = (d?.operatingMargin != null && d.operatingMargin > 0) ? d.operatingMargin : 15.0;
   const pe = (d?.pe != null && d.pe > 0) ? d.pe : 25.0;
+  const rev = (d?.totalRevenue != null && d.totalRevenue > 0) ? d.totalRevenue / 1e7 : 5000;
 
   const orderVal = currentSimOrderCr;
   const preTaxProfit = (orderVal * opm / 100);
   const postTaxProfit = preTaxProfit * 0.75; // 25% tax
   const fairMCapAddition = postTaxProfit * pe;
+  const orderToSalesRatio = (orderVal / rev);
+
+  let capacityWarning = '';
+  if (orderToSalesRatio > 3) {
+    capacityWarning = `Critical Physical Capacity Bottleneck: This ₹${orderVal.toLocaleString('en-IN')} Cr contract represents ${orderToSalesRatio.toFixed(1)}x of annual sales (₹${rev.toFixed(0)} Cr). Delivering this requires a 3–5 year factory Capex cycle. Cash realization will take 12–18 months.`;
+  } else {
+    capacityWarning = `Commercial Timeline Reality: Design (M1–2) → Manufacturing (M3–5) → Dispatch (M6) → LC clearance / payment (M9–12). Cash will not hit the bank account for 9 to 12 months.`;
+  }
 
   document.getElementById('sim-results-grid').innerHTML = `
     <div class="sim-res-card">
@@ -1517,28 +2345,28 @@ function updateOrderSimulator() {
   `;
 
   document.getElementById('sim-diagnostic-callout').innerHTML = `
-    <strong>Forensic Margin Law Diagnostic:</strong> A headline order of <strong>₹${orderVal.toLocaleString('en-IN')} Cr</strong> creates 
+    <strong>Forensic Margin Law & Working Capital Diagnostic:</strong> A headline order of <strong>₹${orderVal.toLocaleString('en-IN')} Cr</strong> generates 
     <strong>₹${preTaxProfit.toFixed(1)} Cr</strong> in true pre-tax profit (~₹${postTaxProfit.toFixed(1)} Cr net income). 
-    At this company's valuation of <strong>${pe.toFixed(1)}x P/E</strong>, the rational economic value added to the company's market cap is 
-    <strong>~₹${fmtCrJS(fairMCapAddition * 1e7)}</strong>. If the stock's market cap reacts by 2x or 4x this amount on social media rumors, 
-    retail investors are overpaying for headline optics!
+    At this company's multiple of <strong>${pe.toFixed(1)}x P/E</strong>, the rational economic market cap addition is 
+    <strong>~₹${fmtCrJS(fairMCapAddition * 1e7)}</strong>. ${capacityWarning}
   `;
 }
 
+/* ─── 12-Point Checklist Renderer ─── */
 function renderFlags(checks) {
-  const statusIcon = { pass: '✅', fail: '🔴', warn: '🟡', na: '⬜' };
+  const statusLabels = { pass: 'PASS', fail: 'FAIL', warn: 'WATCH', na: 'AUDIT' };
   document.getElementById('flags-grid').innerHTML = checks.map(c => `
     <div class="flag-item ${c.status}">
-      <span class="flag-icon">${statusIcon[c.status]}</span>
+      <span class="flag-tag">${statusLabels[c.status]}</span>
       <div class="flag-text">
-        <div class="flag-name">${c.name} <span style="color:var(--text-muted);font-weight:500;font-size:.82rem">(${c.score}/${c.max} pts)</span></div>
+        <div class="flag-name">${c.name} <span style="color:var(--text-muted);font-weight:500;font-size:.8rem;font-family:var(--mono)">(${c.score}/${c.max} pts)</span></div>
         <div class="flag-detail">${c.detail}</div>
       </div>
     </div>
   `).join('');
 }
 
-/* ─── Render Financial Charts (Chart.js) ─── */
+/* ─── Financial Charts (Chart.js) ─── */
 function renderCharts(d) {
   Object.values(chartInstances).forEach(c => c.destroy());
   chartInstances = {};
@@ -1657,13 +2485,13 @@ async function fetchAIVerdict(d) {
     if (data.error) throw new Error(data.error);
     box.innerHTML = markdownToHTML(data.analysis);
   } catch (err) {
-    box.innerHTML = `<div style="color:var(--amber)">⚠️ Forensic verdict note: ${err.message}. Raw audited data and score checklist above remain fully valid.</div>`;
+    box.innerHTML = `<div style="color:var(--amber)">Forensic verdict note: ${err.message}. Raw audited data and score checklist above remain fully valid.</div>`;
   }
 }
 
 async function fetchNews(query) {
-  const list = document.getElementById('news-list');
-  list.innerHTML = '<div style="color:var(--text-muted);font-size:.9rem;padding:12px">Loading verified filings...</div>';
+  const list = document.getElementById('announcements-list');
+  list.innerHTML = '<div style="color:var(--text-muted);font-size:.85rem;padding:12px">Loading verified exchange filings...</div>';
 
   try {
     const res = await fetch('/api/news?q=' + encodeURIComponent(query));
@@ -1671,7 +2499,7 @@ async function fetchNews(query) {
     if (!data.articles?.length) { list.innerHTML = '<div style="color:var(--text-muted);padding:12px">No recent public filings or press releases found.</div>'; return; }
 
     list.innerHTML = data.articles.map(a => `
-      <a href="${a.link}" target="_blank" class="news-item">
+      <a href="${a.link}" target="_blank" rel="noopener noreferrer" class="news-item">
         <span class="news-title">${a.title}</span>
         <div class="news-meta">
           <span class="news-source">${a.source}</span>
@@ -1704,7 +2532,7 @@ async function handleBustRumor() {
   const result = document.getElementById('rumor-result');
 
   btn.disabled = true;
-  btn.textContent = '⏳ Cross-Examining...';
+  btn.textContent = 'Cross-Examining...';
   resultBox.style.display = 'block';
   result.innerHTML = '<div class="verdict-loading"><div class="mini-spinner"></div> Interrogating exchange filings, capacity math & unit margins...</div>';
 
@@ -1731,11 +2559,11 @@ async function handleBustRumor() {
     if (data.error) throw new Error(data.error);
     result.innerHTML = markdownToHTML(data.analysis);
   } catch (err) {
-    result.innerHTML = `<div style="color:var(--red)">❌ Investigation failed: ${err.message}</div>`;
+    result.innerHTML = `<div style="color:var(--red)">Investigation failed: ${err.message}</div>`;
   }
 
   btn.disabled = false;
-  btn.textContent = '🔍 Cross-Examine Claim';
+  btn.textContent = 'Cross-Examine Claim';
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1784,7 +2612,7 @@ async function handleChatSend() {
     chatHistory.push({ role: 'assistant', content: data.analysis });
   } catch (err) {
     const typingEl = document.getElementById(typingId);
-    if (typingEl) typingEl.innerHTML = `<span style="color:var(--red)">❌ ${err.message}</span>`;
+    if (typingEl) typingEl.innerHTML = `<span style="color:var(--red)">${err.message}</span>`;
   }
 
   sendBtn.disabled = false;
