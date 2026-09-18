@@ -345,14 +345,32 @@ input,textarea{font-family:var(--font);outline:none}
   border-radius:var(--radius);padding:20px;
   font-size:.92rem;line-height:1.7;color:var(--text-secondary);
 }
+.score-callout{
+  padding:16px 20px;border-radius:var(--radius-sm);margin:16px 0 20px;
+}
+.score-callout.fail{
+  background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.35);
+}
+.score-callout.fail .sc-title{color:#ef4444;font-size:1.15rem;font-weight:800}
+.score-callout.pass{
+  background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.35);
+}
+.score-callout.pass .sc-title{color:#10b981;font-size:1.15rem;font-weight:800}
+.score-callout.warn{
+  background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.35);
+}
+.score-callout.warn .sc-title{color:#f59e0b;font-size:1.15rem;font-weight:800}
+.score-callout .sc-sub{color:var(--text-secondary);font-size:0.85rem;margin-top:4px}
+
 .rumor-result blockquote, .verdict-box blockquote, .chat-msg blockquote{
   border-left:3px solid var(--accent);background:var(--bg-primary);padding:10px 14px;
   margin:12px 0;border-radius:0 var(--radius-sm) var(--radius-sm) 0;color:var(--text-secondary);
 }
 .rumor-result a, .verdict-box a, .chat-msg a{
-  color:var(--accent);text-decoration:underline;text-underline-offset:3px;
+  color:#60a5fa !important;text-decoration:underline !important;text-underline-offset:3px;
+  font-weight:500;word-break:break-word;
 }
-.rumor-result a:hover, .verdict-box a:hover, .chat-msg a:hover{color:#60a5fa}
+.rumor-result a:hover, .verdict-box a:hover, .chat-msg a:hover{color:#93c5fd !important}
 
 /* ═══════════════════════════════════════════════════════════════
    CHAT MODE
@@ -1382,7 +1400,14 @@ function markdownToHTML(md) {
   if (!md) return '';
   try {
     if (typeof marked !== 'undefined' && marked.parse) {
-      return marked.parse(md, { gfm: true, breaks: true });
+      const renderer = new marked.Renderer();
+      renderer.link = function(token) {
+        const href = typeof token === 'object' ? (token.href || '') : arguments[0];
+        const text = typeof token === 'object' ? (token.text || '') : arguments[2];
+        const title = typeof token === 'object' && token.title ? ` title="${token.title}"` : '';
+        return `<a href="${href}" target="_blank" rel="noopener noreferrer"${title}>${text}</a>`;
+      };
+      return marked.parse(md, { renderer, gfm: true, breaks: true });
     }
   } catch (e) {
     console.warn('marked.parse error:', e);
@@ -1396,7 +1421,7 @@ function markdownToHTML(md) {
     .replace(/^# (.+)$/gm, '<h1>$1</h1>')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
     .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
     .replace(/\n\n/g, '</p><p>')
     .replace(/\n/g, '<br>');
