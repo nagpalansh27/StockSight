@@ -1,0 +1,16 @@
+{
+  "functions": {
+    "api/*.js": {
+      "maxDuration": 30,
+      "memory": 256
+    }
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "s-maxage=300, stale-while-revalidate=600" }
+      ]
+    }
+  ]
+}

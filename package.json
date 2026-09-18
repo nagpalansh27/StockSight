@@ -1,0 +1,9 @@
+{
+  "name": "stocksight",
+  "version": "1.0.0",
+  "description": "AI-powered fact-based stock quality analyzer for Indian stocks",
+  "private": true,
+  "dependencies": {
+    "yahoo-finance2": "^2.14.0"
+  }
+}

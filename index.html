@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StockSight — Fact-Based Stock Intelligence</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   CSS VARIABLES & RESET
+   ═══════════════════════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg-body:#06090f;
+  --bg-primary:#0c1220;
+  --bg-card:#111c2e;
+  --bg-card-hover:#162236;
+  --bg-input:#0e1726;
+  --bg-modal:#0a1018;
+  --text-primary:#e2e8f0;
+  --text-secondary:#94a3b8;
+  --text-muted:#5a6a80;
+  --accent:#3b82f6;
+  --accent-hover:#2563eb;
+  --green:#10b981;
+  --green-dim:#065f46;
+  --red:#ef4444;
+  --red-dim:#7f1d1d;
+  --amber:#f59e0b;
+  --amber-dim:#78350f;
+  --border:#1c2b40;
+  --border-focus:#3b82f6;
+  --radius:12px;
+  --radius-sm:8px;
+  --shadow:0 4px 24px rgba(0,0,0,.4);
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --mono:'SF Mono',Monaco,Consolas,'Courier New',monospace;
+}
+html{font-size:15px;scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg-body);color:var(--text-primary);min-height:100vh;line-height:1.6;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+button{cursor:pointer;font-family:var(--font);border:none;outline:none}
+input,textarea{font-family:var(--font);outline:none}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--bg-primary)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* ═══════════════════════════════════════════════════════════════
+   PASSWORD GATE
+   ═══════════════════════════════════════════════════════════════ */
+#password-gate{
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;padding:20px;
+}
+.pw-box{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:40px;text-align:center;
+  max-width:380px;width:100%;box-shadow:var(--shadow);
+}
+.pw-box h1{font-size:1.8rem;margin-bottom:8px;color:var(--text-primary)}
+.pw-box .pw-icon{font-size:3rem;margin-bottom:16px;display:block}
+.pw-box p{color:var(--text-secondary);margin-bottom:24px;font-size:.9rem}
+.pw-box input{
+  width:100%;padding:12px 16px;border-radius:var(--radius-sm);
+  border:1px solid var(--border);background:var(--bg-input);
+  color:var(--text-primary);font-size:1rem;margin-bottom:16px;
+  text-align:center;letter-spacing:3px;
+}
+.pw-box input:focus{border-color:var(--accent)}
+.pw-box button{
+  width:100%;padding:12px;border-radius:var(--radius-sm);
+  background:var(--accent);color:#fff;font-size:1rem;font-weight:600;
+  transition:background .2s;
+}
+.pw-box button:hover{background:var(--accent-hover)}
+.pw-error{color:var(--red);font-size:.85rem;margin-top:8px;display:none}
+
+/* ═══════════════════════════════════════════════════════════════
+   MAIN APP LAYOUT
+   ═══════════════════════════════════════════════════════════════ */
+#app{display:none;max-width:1200px;margin:0 auto;padding:16px 20px 60px}
+
+/* ─── Header ─── */
+.app-header{
+  display:flex;flex-wrap:wrap;align-items:center;gap:16px;
+  padding:16px 0;border-bottom:1px solid var(--border);margin-bottom:20px;
+}
+.app-logo{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.app-logo h1{font-size:1.4rem;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.app-logo span{font-size:1.5rem}
+
+/* ─── Search ─── */
+.search-wrapper{flex:1;min-width:280px;position:relative}
+.search-bar{
+  display:flex;gap:0;border-radius:var(--radius-sm);overflow:hidden;
+  border:1px solid var(--border);background:var(--bg-input);
+  transition:border-color .2s;
+}
+.search-bar:focus-within{border-color:var(--accent)}
+.search-bar input{
+  flex:1;padding:10px 14px;background:transparent;border:none;
+  color:var(--text-primary);font-size:.95rem;
+}
+.search-bar input::placeholder{color:var(--text-muted)}
+.search-bar button{
+  padding:10px 18px;background:var(--accent);color:#fff;
+  font-weight:600;font-size:.9rem;transition:background .2s;
+}
+.search-bar button:hover{background:var(--accent-hover)}
+.search-bar button:disabled{opacity:.5;cursor:not-allowed}
+
+/* ─── Autocomplete Dropdown ─── */
+.autocomplete{
+  position:absolute;top:100%;left:0;right:0;z-index:100;
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:0 0 var(--radius-sm) var(--radius-sm);
+  box-shadow:var(--shadow);display:none;max-height:300px;overflow-y:auto;
+}
+.autocomplete.active{display:block}
+.ac-item{
+  padding:10px 14px;cursor:pointer;display:flex;justify-content:space-between;
+  align-items:center;border-bottom:1px solid var(--border);
+  transition:background .15s;
+}
+.ac-item:last-child{border-bottom:none}
+.ac-item:hover,.ac-item.selected{background:var(--bg-card-hover)}
+.ac-item .ac-name{font-weight:500;font-size:.9rem}
+.ac-item .ac-sym{color:var(--text-muted);font-size:.8rem;font-family:var(--mono)}
+
+/* ─── Mode Tabs ─── */
+.mode-tabs{
+  display:flex;gap:4px;flex-shrink:0;
+  background:var(--bg-primary);border-radius:var(--radius-sm);padding:3px;
+}
+.mode-tab{
+  padding:8px 16px;border-radius:6px;font-size:.85rem;font-weight:500;
+  color:var(--text-secondary);background:transparent;transition:all .2s;
+  white-space:nowrap;
+}
+.mode-tab:hover{color:var(--text-primary)}
+.mode-tab.active{background:var(--accent);color:#fff}
+@media(max-width:700px){
+  .mode-tabs{width:100%;order:3}
+  .mode-tab{flex:1;text-align:center;padding:8px 8px;font-size:.8rem}
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   QUALITY CHECK MODE
+   ═══════════════════════════════════════════════════════════════ */
+.mode-view{display:none}
+.mode-view.active{display:block}
+
+/* ─── Empty State ─── */
+.empty-state{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:80px 20px;text-align:center;color:var(--text-muted);
+}
+.empty-state .es-icon{font-size:4rem;margin-bottom:16px;opacity:.5}
+.empty-state h2{font-size:1.3rem;color:var(--text-secondary);margin-bottom:8px}
+.empty-state p{max-width:400px;font-size:.9rem;line-height:1.5}
+
+/* ─── Loading ─── */
+.loading-overlay{
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  padding:80px 20px;
+}
+.loading-overlay.active{display:flex}
+.spinner{
+  width:48px;height:48px;border:4px solid var(--border);
+  border-top-color:var(--accent);border-radius:50%;
+  animation:spin .8s linear infinite;margin-bottom:16px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{color:var(--text-secondary);font-size:.95rem}
+
+/* ─── Score Section ─── */
+.score-section{
+  display:grid;grid-template-columns:auto 1fr;gap:24px;
+  margin-bottom:24px;
+}
+@media(max-width:600px){.score-section{grid-template-columns:1fr}}
+
+.score-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:32px;text-align:center;
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;min-width:200px;
+}
+.score-ring{
+  width:140px;height:140px;position:relative;margin-bottom:12px;
+}
+.score-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.score-ring circle{fill:none;stroke-width:8;stroke-linecap:round}
+.score-ring .ring-bg{stroke:var(--border)}
+.score-ring .ring-fg{stroke:var(--green);transition:stroke-dashoffset 1.2s ease-out,stroke .3s}
+.score-ring .score-num{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-size:2.5rem;font-weight:800;
+}
+.score-grade{font-size:1.6rem;font-weight:700;margin-bottom:4px}
+.score-label{color:var(--text-secondary);font-size:.9rem}
+
+/* ─── Metrics Grid ─── */
+.metrics-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:12px;align-content:start;
+}
+.metric-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:14px;
+}
+.metric-label{font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.metric-value{font-size:1.15rem;font-weight:700}
+.metric-sub{font-size:.8rem;margin-top:2px}
+.metric-sub.up{color:var(--green)}
+.metric-sub.down{color:var(--red)}
+.metric-sub.neutral{color:var(--text-muted)}
+
+/* ─── Red Flags ─── */
+.flags-section{margin-bottom:24px}
+.flags-section h3{font-size:1rem;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.flags-grid{display:flex;flex-direction:column;gap:8px}
+.flag-item{
+  display:flex;align-items:flex-start;gap:10px;padding:12px 14px;
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius-sm);font-size:.9rem;
+}
+.flag-item.pass{border-left:3px solid var(--green)}
+.flag-item.fail{border-left:3px solid var(--red)}
+.flag-item.warn{border-left:3px solid var(--amber)}
+.flag-item.na{border-left:3px solid var(--text-muted)}
+.flag-icon{font-size:1rem;flex-shrink:0;margin-top:1px}
+.flag-text{flex:1}
+.flag-name{font-weight:600;margin-bottom:2px}
+.flag-detail{color:var(--text-secondary);font-size:.85rem}
+
+/* ─── Charts ─── */
+.charts-section{margin-bottom:24px}
+.charts-section h3{font-size:1rem;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.charts-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:16px;
+}
+@media(max-width:700px){.charts-grid{grid-template-columns:1fr}}
+.chart-box{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:16px;
+}
+.chart-box h4{font-size:.85rem;color:var(--text-secondary);margin-bottom:12px}
+.chart-box canvas{width:100%!important;max-height:220px}
+
+/* ─── AI Verdict ─── */
+.verdict-section{margin-bottom:24px}
+.verdict-section h3{font-size:1rem;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.verdict-box{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:20px;
+  font-size:.92rem;line-height:1.7;color:var(--text-secondary);
+}
+.verdict-box h1,.verdict-box h2,.verdict-box h3,.verdict-box h4{color:var(--text-primary);margin:16px 0 8px;font-size:1rem}
+.verdict-box h1:first-child,.verdict-box h2:first-child,.verdict-box h3:first-child{margin-top:0}
+.verdict-box strong{color:var(--text-primary)}
+.verdict-box ul,.verdict-box ol{padding-left:20px;margin:8px 0}
+.verdict-box li{margin-bottom:4px}
+.verdict-box code{background:var(--bg-primary);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:.85em}
+.verdict-loading{color:var(--text-muted);font-style:italic;display:flex;align-items:center;gap:8px}
+.verdict-loading .mini-spinner{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite}
+
+/* ─── News Section ─── */
+.news-section{margin-bottom:24px}
+.news-section h3{font-size:1rem;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.news-list{display:flex;flex-direction:column;gap:8px}
+.news-item{
+  display:flex;justify-content:space-between;align-items:flex-start;gap:12px;
+  padding:12px 14px;background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius-sm);transition:background .15s;
+}
+.news-item:hover{background:var(--bg-card-hover)}
+.news-title{font-size:.88rem;font-weight:500;flex:1}
+.news-meta{display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0;gap:4px}
+.news-source{font-size:.75rem;color:var(--text-muted)}
+.news-date{font-size:.72rem;color:var(--text-muted)}
+.news-sentiment{font-size:.7rem;padding:2px 8px;border-radius:10px;font-weight:600;text-transform:uppercase}
+.news-sentiment.positive{background:var(--green-dim);color:var(--green)}
+.news-sentiment.negative{background:var(--red-dim);color:var(--red)}
+.news-sentiment.neutral{background:var(--bg-primary);color:var(--text-muted)}
+
+/* ─── Stock Info Bar ─── */
+.stock-info-bar{
+  display:flex;flex-wrap:wrap;align-items:center;gap:12px;
+  padding:14px 16px;margin-bottom:20px;
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);
+}
+.sib-name{font-weight:700;font-size:1.1rem}
+.sib-sym{color:var(--text-muted);font-family:var(--mono);font-size:.85rem}
+.sib-price{font-size:1.2rem;font-weight:700;margin-left:auto}
+.sib-change{font-size:.85rem;font-weight:600;padding:3px 8px;border-radius:6px}
+.sib-change.up{background:var(--green-dim);color:var(--green)}
+.sib-change.down{background:var(--red-dim);color:var(--red)}
+.sib-detail{font-size:.8rem;color:var(--text-muted)}
+
+/* ═══════════════════════════════════════════════════════════════
+   RUMOR BUSTER MODE
+   ═══════════════════════════════════════════════════════════════ */
+.rumor-input-box{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:24px;margin-bottom:24px;
+}
+.rumor-input-box h3{margin-bottom:4px;font-size:1rem}
+.rumor-input-box p{color:var(--text-secondary);font-size:.85rem;margin-bottom:16px}
+.rumor-input-box textarea{
+  width:100%;min-height:90px;padding:12px 14px;
+  background:var(--bg-input);border:1px solid var(--border);
+  border-radius:var(--radius-sm);color:var(--text-primary);
+  font-size:.95rem;resize:vertical;margin-bottom:12px;
+}
+.rumor-input-box textarea:focus{border-color:var(--accent)}
+.rumor-input-box textarea::placeholder{color:var(--text-muted)}
+.rumor-row{display:flex;gap:12px;align-items:center}
+.rumor-row input{
+  flex:1;padding:10px 14px;background:var(--bg-input);
+  border:1px solid var(--border);border-radius:var(--radius-sm);
+  color:var(--text-primary);font-size:.9rem;
+}
+.rumor-row input:focus{border-color:var(--accent)}
+.rumor-row input::placeholder{color:var(--text-muted)}
+.rumor-btn{
+  padding:10px 24px;background:var(--red);color:#fff;
+  border-radius:var(--radius-sm);font-weight:600;font-size:.9rem;
+  transition:background .2s;white-space:nowrap;
+}
+.rumor-btn:hover{background:#dc2626}
+.rumor-btn:disabled{opacity:.5;cursor:not-allowed}
+.rumor-result{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:20px;
+  font-size:.92rem;line-height:1.7;color:var(--text-secondary);
+}
+.rumor-result h1,.rumor-result h2,.rumor-result h3,.rumor-result h4{color:var(--text-primary);margin:16px 0 8px;font-size:1rem}
+.rumor-result h1:first-child,.rumor-result h2:first-child,.rumor-result h3:first-child{margin-top:0}
+.rumor-result strong{color:var(--text-primary)}
+.rumor-result ul,.rumor-result ol{padding-left:20px;margin:8px 0}
+.rumor-result li{margin-bottom:4px}
+
+/* ═══════════════════════════════════════════════════════════════
+   CHAT MODE
+   ═══════════════════════════════════════════════════════════════ */
+.chat-container{
+  display:flex;flex-direction:column;height:calc(100vh - 160px);
+  min-height:400px;max-height:800px;
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;
+}
+.chat-header{
+  padding:12px 16px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:8px;font-size:.85rem;
+  color:var(--text-secondary);flex-shrink:0;
+}
+.chat-header .dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+.chat-messages{
+  flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;
+}
+.chat-msg{max-width:85%;padding:12px 16px;border-radius:var(--radius-sm);font-size:.9rem;line-height:1.6}
+.chat-msg.user{
+  align-self:flex-end;background:var(--accent);color:#fff;
+  border-bottom-right-radius:4px;
+}
+.chat-msg.assistant{
+  align-self:flex-start;background:var(--bg-primary);
+  color:var(--text-secondary);border-bottom-left-radius:4px;
+}
+.chat-msg.assistant h1,.chat-msg.assistant h2,.chat-msg.assistant h3,.chat-msg.assistant h4{color:var(--text-primary);margin:12px 0 6px;font-size:.95rem}
+.chat-msg.assistant h1:first-child,.chat-msg.assistant h2:first-child,.chat-msg.assistant h3:first-child{margin-top:0}
+.chat-msg.assistant strong{color:var(--text-primary)}
+.chat-msg.assistant ul,.chat-msg.assistant ol{padding-left:18px;margin:6px 0}
+.chat-msg.assistant li{margin-bottom:3px}
+.chat-msg.assistant code{background:var(--bg-card);padding:1px 5px;border-radius:3px;font-family:var(--mono);font-size:.85em}
+.chat-msg.system{
+  align-self:center;color:var(--text-muted);font-size:.8rem;
+  font-style:italic;
+}
+.chat-input-row{
+  display:flex;gap:0;border-top:1px solid var(--border);flex-shrink:0;
+}
+.chat-input-row input{
+  flex:1;padding:14px 16px;background:var(--bg-input);border:none;
+  color:var(--text-primary);font-size:.95rem;
+}
+.chat-input-row input::placeholder{color:var(--text-muted)}
+.chat-input-row button{
+  padding:14px 20px;background:var(--accent);color:#fff;
+  font-weight:600;transition:background .2s;
+}
+.chat-input-row button:hover{background:var(--accent-hover)}
+.chat-input-row button:disabled{opacity:.5;cursor:not-allowed}
+
+/* ─── Settings Toggle ─── */
+.settings-btn{
+  position:fixed;bottom:20px;right:20px;z-index:50;
+  width:44px;height:44px;border-radius:50%;background:var(--bg-card);
+  border:1px solid var(--border);color:var(--text-secondary);
+  font-size:1.2rem;display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--shadow);transition:background .2s;
+}
+.settings-btn:hover{background:var(--bg-card-hover);color:var(--text-primary)}
+
+/* ─── Settings Modal ─── */
+.modal-overlay{
+  display:none;position:fixed;top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center;
+}
+.modal-overlay.active{display:flex}
+.modal-box{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:28px;max-width:440px;width:90%;
+  box-shadow:var(--shadow);
+}
+.modal-box h2{margin-bottom:20px;font-size:1.1rem;display:flex;align-items:center;gap:8px}
+.modal-group{margin-bottom:16px}
+.modal-group label{display:block;font-size:.85rem;color:var(--text-secondary);margin-bottom:6px}
+.modal-group input{
+  width:100%;padding:10px 12px;background:var(--bg-input);
+  border:1px solid var(--border);border-radius:var(--radius-sm);
+  color:var(--text-primary);font-size:.9rem;font-family:var(--mono);
+}
+.modal-group input:focus{border-color:var(--accent)}
+.modal-group small{display:block;margin-top:4px;color:var(--text-muted);font-size:.75rem}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+.modal-actions button{padding:8px 20px;border-radius:var(--radius-sm);font-size:.9rem;font-weight:500}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-hover)}
+.btn-ghost{background:transparent;color:var(--text-secondary);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--bg-card-hover);color:var(--text-primary)}
+
+/* ─── Disclaimer ─── */
+.disclaimer{
+  text-align:center;padding:20px;color:var(--text-muted);font-size:.75rem;
+  border-top:1px solid var(--border);margin-top:32px;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PASSWORD GATE
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="password-gate">
+  <div class="pw-box">
+    <span class="pw-icon">🔍</span>
+    <h1>StockSight</h1>
+    <p>Fact-based stock intelligence.<br>Enter password to continue.</p>
+    <input type="password" id="pw-input" placeholder="••••" autocomplete="off">
+    <button id="pw-btn" onclick="checkPassword()">Unlock</button>
+    <div class="pw-error" id="pw-error">Wrong password. Try again.</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MAIN APP
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="app">
+  <!-- Header -->
+  <header class="app-header">
+    <div class="app-logo">
+      <span>🔍</span>
+      <h1>StockSight</h1>
+    </div>
+
+    <div class="search-wrapper">
+      <div class="search-bar">
+        <input type="text" id="search-input" placeholder="Search stock (e.g. RELIANCE, HDFC, TCS...)" autocomplete="off">
+        <button id="search-btn" onclick="handleAnalyze()">Analyze</button>
+      </div>
+      <div class="autocomplete" id="autocomplete"></div>
+    </div>
+
+    <nav class="mode-tabs">
+      <button class="mode-tab active" data-mode="quality" onclick="switchMode('quality')">📊 Quality</button>
+      <button class="mode-tab" data-mode="rumor" onclick="switchMode('rumor')">🔍 Rumor Buster</button>
+      <button class="mode-tab" data-mode="chat" onclick="switchMode('chat')">💬 Chat</button>
+    </nav>
+  </header>
+
+  <!-- ═══ QUALITY CHECK MODE ═══ -->
+  <div class="mode-view active" id="view-quality">
+    <!-- Empty State -->
+    <div id="quality-empty" class="empty-state">
+      <div class="es-icon">📊</div>
+      <h2>Analyze Any Stock</h2>
+      <p>Enter a stock ticker or company name above to get a comprehensive fact-based quality score using Rohit's 12-point checklist.</p>
+    </div>
+
+    <!-- Loading -->
+    <div id="quality-loading" class="loading-overlay">
+      <div class="spinner"></div>
+      <div class="loading-text">Fetching financial data...</div>
+    </div>
+
+    <!-- Results -->
+    <div id="quality-results" style="display:none">
+      <!-- Stock Info Bar -->
+      <div class="stock-info-bar" id="stock-info-bar"></div>
+
+      <!-- Score + Metrics -->
+      <div class="score-section">
+        <div class="score-card" id="score-card">
+          <div class="score-ring">
+            <svg viewBox="0 0 160 160">
+              <circle class="ring-bg" cx="80" cy="80" r="68"/>
+              <circle class="ring-fg" id="score-ring-fg" cx="80" cy="80" r="68" stroke-dasharray="427.3" stroke-dashoffset="427.3"/>
+            </svg>
+            <div class="score-num" id="score-num">—</div>
+          </div>
+          <div class="score-grade" id="score-grade">—</div>
+          <div class="score-label" id="score-label">Enter a stock to analyze</div>
+        </div>
+        <div class="metrics-grid" id="metrics-grid"></div>
+      </div>
+
+      <!-- Red Flags -->
+      <div class="flags-section">
+        <h3>🚩 Quality Checklist</h3>
+        <div class="flags-grid" id="flags-grid"></div>
+      </div>
+
+      <!-- Charts -->
+      <div class="charts-section">
+        <h3>📈 Financial Trends</h3>
+        <div class="charts-grid">
+          <div class="chart-box"><h4>Revenue & Profit (Annual)</h4><canvas id="chart-revenue"></canvas></div>
+          <div class="chart-box"><h4>Cash Flow (Annual)</h4><canvas id="chart-cashflow"></canvas></div>
+          <div class="chart-box"><h4>Stock Price (5 Years)</h4><canvas id="chart-price"></canvas></div>
+          <div class="chart-box"><h4>Operating Margin Trend</h4><canvas id="chart-margin"></canvas></div>
+        </div>
+      </div>
+
+      <!-- AI Verdict -->
+      <div class="verdict-section">
+        <h3>🤖 AI Analysis (Rohit's Framework)</h3>
+        <div class="verdict-box" id="verdict-box">
+          <div class="verdict-loading">
+            <div class="mini-spinner"></div>
+            Generating AI analysis...
+          </div>
+        </div>
+      </div>
+
+      <!-- News -->
+      <div class="news-section">
+        <h3>📰 Recent News</h3>
+        <div class="news-list" id="news-list">
+          <div style="color:var(--text-muted);font-size:.9rem;padding:12px">Loading news...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ RUMOR BUSTER MODE ═══ -->
+  <div class="mode-view" id="view-rumor">
+    <div class="rumor-input-box">
+      <h3>🔍 Rumor Buster</h3>
+      <p>Enter a market rumor, tip, or claim. StockSight will actively try to disprove it using hard financial data — exactly how Rohit would.</p>
+      <textarea id="rumor-text" placeholder="e.g. 'My friend told me ABC Pharma is getting a ₹5000 Cr government contract and the stock will 3x'"></textarea>
+      <div class="rumor-row">
+        <input id="rumor-ticker" placeholder="Stock ticker (optional, e.g. RELIANCE)">
+        <button class="rumor-btn" id="rumor-btn" onclick="handleBustRumor()">🔍 Bust This Rumor</button>
+      </div>
+    </div>
+    <div id="rumor-result-box" style="display:none">
+      <div class="rumor-result" id="rumor-result"></div>
+    </div>
+  </div>
+
+  <!-- ═══ CHAT MODE ═══ -->
+  <div class="mode-view" id="view-chat">
+    <div class="chat-container">
+      <div class="chat-header">
+        <span class="dot"></span>
+        StockSight AI — Ask anything about stocks. All answers are fact-based, no speculation.
+      </div>
+      <div class="chat-messages" id="chat-messages">
+        <div class="chat-msg system">Type a message below to start. You can ask about any stock, compare companies, or question market narratives.</div>
+      </div>
+      <div class="chat-input-row">
+        <input type="text" id="chat-input" placeholder="Ask about any stock... (e.g. 'Is Zomato overvalued?')" autocomplete="off">
+        <button id="chat-send-btn" onclick="handleChatSend()">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Disclaimer -->
+  <div class="disclaimer">
+    StockSight is an analytical tool, not financial advice. Always do your own research. Data sourced from Yahoo Finance. AI powered by Google Gemini.
+  </div>
+</div>
+
+<!-- Settings FAB -->
+<button class="settings-btn" id="settings-btn" onclick="toggleSettings()" style="display:none">⚙️</button>
+
+<!-- Settings Modal -->
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal-box">
+    <h2>⚙️ Settings</h2>
+    <div class="modal-group">
+      <label>AI Analysis Engine</label>
+      <select id="setting-model-pref" style="width:100%;padding:10px 12px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-size:.9rem">
+        <option value="auto">Auto (Gemini AI with Smart Fallback)</option>
+        <option value="ollama">Local Qwen 27B (Ollama RTX 4090)</option>
+        <option value="gemini">Google Gemini API</option>
+        <option value="rules">Pure Fact Engine (Offline / Math Only)</option>
+      </select>
+      <small>Select your preferred AI backend. Local Ollama connects to http://localhost:11434.</small>
+    </div>
+    <div class="modal-group">
+      <label>Gemini API Key</label>
+      <input type="password" id="setting-api-key" placeholder="Enter your Gemini API key...">
+      <small>Optional if using server-side key or local Ollama. Get free key at <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com</a></small>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="toggleSettings()">Cancel</button>
+      <button class="btn-primary" onclick="saveSettings()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     JAVASCRIPT
+     ═══════════════════════════════════════════════════════════════ -->
+<script>
+/* ─── Constants ─── */
+const PW_HASH = '62c66a7a5dd70c3146618063c344e531e6d4b59e379808443ce962b3abd63c5a'; // sha256('ansh')
+const CIRC = 2 * Math.PI * 68; // score ring circumference
+
+/* ─── State ─── */
+let currentStockData = null;
+let selectedSymbol = null;
+let chatHistory = [];
+let chartInstances = {};
+let searchDebounce = null;
+
+/* ═══════════════════════════════════════════════════════════════
+   PASSWORD
+   ═══════════════════════════════════════════════════════════════ */
+async function sha256(msg) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function checkPassword() {
+  const pw = document.getElementById('pw-input').value;
+  const hash = await sha256(pw);
+  if (hash === PW_HASH) {
+    localStorage.setItem('ss_auth', 'true');
+    showApp();
+  } else {
+    document.getElementById('pw-error').style.display = 'block';
+    document.getElementById('pw-input').value = '';
+    document.getElementById('pw-input').focus();
+  }
+}
+
+function showApp() {
+  document.getElementById('password-gate').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('settings-btn').style.display = 'flex';
+  document.getElementById('search-input').focus();
+}
+
+// Auto-login
+if (localStorage.getItem('ss_auth') === 'true') showApp();
+document.getElementById('pw-input')?.addEventListener('keydown', e => { if (e.key === 'Enter') checkPassword(); });
+
+/* ═══════════════════════════════════════════════════════════════
+   MODE SWITCHING
+   ═══════════════════════════════════════════════════════════════ */
+function switchMode(mode) {
+  document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === mode));
+  document.querySelectorAll('.mode-view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + mode).classList.add('active');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SEARCH / AUTOCOMPLETE
+   ═══════════════════════════════════════════════════════════════ */
+const searchInput = document.getElementById('search-input');
+const acBox = document.getElementById('autocomplete');
+
+searchInput.addEventListener('input', () => {
+  clearTimeout(searchDebounce);
+  const q = searchInput.value.trim();
+  if (q.length < 1) { acBox.classList.remove('active'); return; }
+  searchDebounce = setTimeout(() => doSearch(q), 300);
+});
+
+searchInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    acBox.classList.remove('active');
+    handleAnalyze();
+  }
+  if (e.key === 'Escape') acBox.classList.remove('active');
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    navigateAC(e.key === 'ArrowDown' ? 1 : -1);
+  }
+});
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.search-wrapper')) acBox.classList.remove('active');
+});
+
+async function doSearch(q) {
+  try {
+    const res = await fetch('/api/stock?action=search&q=' + encodeURIComponent(q));
+    const data = await res.json();
+    renderAC(data.quotes || []);
+  } catch (e) {
+    console.error('Search error:', e);
+  }
+}
+
+function renderAC(quotes) {
+  if (!quotes.length) { acBox.classList.remove('active'); return; }
+  acBox.innerHTML = quotes.map((q, i) =>
+    `<div class="ac-item" data-symbol="${q.symbol}" onclick="selectAC('${q.symbol}','${esc(q.name)}')" tabindex="0">
+      <span class="ac-name">${esc(q.name)}</span>
+      <span class="ac-sym">${q.symbol}</span>
+    </div>`
+  ).join('');
+  acBox.classList.add('active');
+}
+
+function selectAC(symbol, name) {
+  searchInput.value = name;
+  selectedSymbol = symbol;
+  acBox.classList.remove('active');
+  handleAnalyze();
+}
+
+function navigateAC(dir) {
+  const items = acBox.querySelectorAll('.ac-item');
+  if (!items.length) return;
+  let idx = [...items].findIndex(i => i.classList.contains('selected'));
+  items.forEach(i => i.classList.remove('selected'));
+  idx += dir;
+  if (idx < 0) idx = items.length - 1;
+  if (idx >= items.length) idx = 0;
+  items[idx].classList.add('selected');
+  items[idx].scrollIntoView({ block: 'nearest' });
+  selectedSymbol = items[idx].dataset.symbol;
+  searchInput.value = items[idx].querySelector('.ac-name').textContent;
+}
+
+function esc(s) { return (s || '').replace(/'/g, "\\'").replace(/</g, '&lt;'); }
+
+/* ═══════════════════════════════════════════════════════════════
+   ANALYZE STOCK
+   ═══════════════════════════════════════════════════════════════ */
+async function handleAnalyze() {
+  const sym = selectedSymbol || searchInput.value.trim().toUpperCase();
+  if (!sym) return;
+  acBox.classList.remove('active');
+  switchMode('quality');
+
+  // Show loading
+  document.getElementById('quality-empty').style.display = 'none';
+  document.getElementById('quality-results').style.display = 'none';
+  document.getElementById('quality-loading').classList.add('active');
+  document.getElementById('search-btn').disabled = true;
+
+  try {
+    const res = await fetch('/api/stock?action=quote&symbol=' + encodeURIComponent(sym));
+    if (!res.ok) throw new Error('Failed to fetch stock data');
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    currentStockData = data;
+    selectedSymbol = data.symbol;
+
+    // Render everything
+    renderStockInfoBar(data);
+    const scoreResult = calculateQualityScore(data);
+    renderScore(scoreResult);
+    renderMetrics(data);
+    renderFlags(scoreResult.checks);
+    renderCharts(data);
+
+    document.getElementById('quality-loading').classList.remove('active');
+    document.getElementById('quality-results').style.display = 'block';
+
+    // Fetch AI verdict (async)
+    fetchAIVerdict(data);
+    // Fetch news (async)
+    fetchNews(data.name || sym);
+
+  } catch (err) {
+    document.getElementById('quality-loading').classList.remove('active');
+    document.getElementById('quality-empty').style.display = 'flex';
+    document.getElementById('quality-empty').innerHTML = `
+      <div class="es-icon">❌</div>
+      <h2>Error</h2>
+      <p>${err.message}. Make sure the ticker is correct and try again.</p>
+    `;
+  }
+  document.getElementById('search-btn').disabled = false;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SCORING ENGINE — Rohit's 12-Point Checklist
+   ═══════════════════════════════════════════════════════════════ */
+function calculateQualityScore(d) {
+  const checks = [];
+  let totalScore = 0;
+  const totalMax = 100;
+
+  // 1. Revenue Reality (12 pts)
+  const revCAGR = d.revenueCAGR;
+  const revGrowth = d.revenueGrowth;
+  let s1 = 0, st1 = 'na', det1 = 'Insufficient data';
+  if (revCAGR != null) {
+    if (revCAGR > 15) { s1 = 12; st1 = 'pass'; det1 = `Revenue CAGR ${revCAGR.toFixed(1)}% — Strong consistent growth`; }
+    else if (revCAGR > 10) { s1 = 9; st1 = 'pass'; det1 = `Revenue CAGR ${revCAGR.toFixed(1)}% — Good growth`; }
+    else if (revCAGR > 5) { s1 = 6; st1 = 'warn'; det1 = `Revenue CAGR ${revCAGR.toFixed(1)}% — Moderate growth`; }
+    else if (revCAGR > 0) { s1 = 3; st1 = 'warn'; det1 = `Revenue CAGR ${revCAGR.toFixed(1)}% — Slow growth`; }
+    else { s1 = 0; st1 = 'fail'; det1 = `Revenue CAGR ${revCAGR.toFixed(1)}% — Revenue is declining!`; }
+  } else if (revGrowth != null) {
+    if (revGrowth > 10) { s1 = 10; st1 = 'pass'; det1 = `YoY Revenue Growth ${revGrowth.toFixed(1)}%`; }
+    else if (revGrowth > 0) { s1 = 5; st1 = 'warn'; det1 = `YoY Revenue Growth ${revGrowth.toFixed(1)}%`; }
+    else { s1 = 0; st1 = 'fail'; det1 = `YoY Revenue Growth ${revGrowth.toFixed(1)}% — Declining!`; }
+  }
+  checks.push({ name: 'Revenue Reality', score: s1, max: 12, status: st1, detail: det1 });
+  totalScore += s1;
+
+  // 2. Profit Quality (12 pts)
+  const opm = d.operatingMargin;
+  let s2 = 0, st2 = 'na', det2 = 'Insufficient data';
+  if (opm != null) {
+    if (opm > 20) { s2 = 12; st2 = 'pass'; det2 = `Operating Margin ${opm.toFixed(1)}% — Excellent profitability`; }
+    else if (opm > 12) { s2 = 9; st2 = 'pass'; det2 = `Operating Margin ${opm.toFixed(1)}% — Good profitability`; }
+    else if (opm > 5) { s2 = 6; st2 = 'warn'; det2 = `Operating Margin ${opm.toFixed(1)}% — Thin margins`; }
+    else if (opm > 0) { s2 = 3; st2 = 'warn'; det2 = `Operating Margin ${opm.toFixed(1)}% — Very thin margins`; }
+    else { s2 = 0; st2 = 'fail'; det2 = `Operating Margin ${opm.toFixed(1)}% — Loss-making!`; }
+  }
+  checks.push({ name: 'Profit Quality', score: s2, max: 12, status: st2, detail: det2 });
+  totalScore += s2;
+
+  // 3. Cash Flow Check (10 pts) — compare OCF to net income
+  const ocf = d.operatingCashFlow;
+  const ni = d.financials?.income?.length ? d.financials.income[d.financials.income.length - 1]?.netIncome : null;
+  let s3 = 0, st3 = 'na', det3 = 'Insufficient data';
+  if (ocf != null && ni != null && ni !== 0) {
+    const ratio = ocf / Math.abs(ni);
+    if (ratio > 0.8) { s3 = 10; st3 = 'pass'; det3 = `OCF/Net Income = ${ratio.toFixed(2)}x — Cash flow supports reported profits`; }
+    else if (ratio > 0.5) { s3 = 6; st3 = 'warn'; det3 = `OCF/Net Income = ${ratio.toFixed(2)}x — Some gap between cash & profit`; }
+    else { s3 = 2; st3 = 'fail'; det3 = `OCF/Net Income = ${ratio.toFixed(2)}x — Profits may be accounting fiction!`; }
+  } else if (ocf != null) {
+    if (ocf > 0) { s3 = 6; st3 = 'pass'; det3 = `Positive operating cash flow: ₹${fmtCrJS(ocf)}`; }
+    else { s3 = 0; st3 = 'fail'; det3 = `Negative operating cash flow: ₹${fmtCrJS(ocf)}`; }
+  }
+  checks.push({ name: 'Cash Flow Check', score: s3, max: 10, status: st3, detail: det3 });
+  totalScore += s3;
+
+  // 4. Valuation Sanity (10 pts) — Market Cap / Revenue
+  const mcr = d.marketCapToRevenue;
+  let s4 = 0, st4 = 'na', det4 = 'Insufficient data';
+  if (mcr != null) {
+    const isFinancial = (d.sector || '').toLowerCase().includes('financial');
+    const isTech = (d.sector || '').toLowerCase().includes('tech') || (d.industry || '').toLowerCase().includes('software');
+    const threshold = isTech ? 15 : isFinancial ? 8 : 10;
+    if (mcr < 2) { s4 = 10; st4 = 'pass'; det4 = `MCap/Revenue = ${mcr.toFixed(1)}x — Attractively valued`; }
+    else if (mcr < 5) { s4 = 8; st4 = 'pass'; det4 = `MCap/Revenue = ${mcr.toFixed(1)}x — Fairly valued`; }
+    else if (mcr < threshold) { s4 = 5; st4 = 'warn'; det4 = `MCap/Revenue = ${mcr.toFixed(1)}x — Getting expensive`; }
+    else { s4 = 1; st4 = 'fail'; det4 = `MCap/Revenue = ${mcr.toFixed(1)}x — Overvalued! Premium pricing${isTech ? ' (even for tech)' : ''}`; }
+  }
+  checks.push({ name: 'Valuation Sanity', score: s4, max: 10, status: st4, detail: det4 });
+  totalScore += s4;
+
+  // 5. Debt Load (10 pts)
+  const de = d.debtToEquity;
+  let s5 = 0, st5 = 'na', det5 = 'Insufficient data';
+  const isBank = (d.sector || '').toLowerCase().includes('financial') || (d.industry || '').toLowerCase().includes('bank');
+  if (de != null) {
+    if (isBank) {
+      det5 = `D/E = ${de.toFixed(2)} (Financial sector — high D/E is normal)`;
+      s5 = de < 8 ? 8 : 5; st5 = 'pass';
+    } else if (de < 0.3) { s5 = 10; st5 = 'pass'; det5 = `D/E = ${de.toFixed(2)} — Very low debt, strong balance sheet`; }
+    else if (de < 0.7) { s5 = 8; st5 = 'pass'; det5 = `D/E = ${de.toFixed(2)} — Manageable debt`; }
+    else if (de < 1.0) { s5 = 5; st5 = 'warn'; det5 = `D/E = ${de.toFixed(2)} — Moderate debt`; }
+    else if (de < 2.0) { s5 = 2; st5 = 'fail'; det5 = `D/E = ${de.toFixed(2)} — High debt! Risk of financial stress`; }
+    else { s5 = 0; st5 = 'fail'; det5 = `D/E = ${de.toFixed(2)} — Dangerously overleveraged!`; }
+  }
+  checks.push({ name: 'Debt Load', score: s5, max: 10, status: st5, detail: det5 });
+  totalScore += s5;
+
+  // 6. Promoter/Insider Faith (8 pts)
+  const ih = d.insiderHolding;
+  let s6 = 0, st6 = 'na', det6 = 'Insufficient data (promoter holdings not available via this source)';
+  if (ih != null) {
+    if (ih > 50) { s6 = 8; st6 = 'pass'; det6 = `Insider holding ${ih.toFixed(1)}% — Strong promoter confidence`; }
+    else if (ih > 30) { s6 = 5; st6 = 'warn'; det6 = `Insider holding ${ih.toFixed(1)}% — Moderate`; }
+    else if (ih > 10) { s6 = 3; st6 = 'warn'; det6 = `Insider holding ${ih.toFixed(1)}% — Low insider ownership`; }
+    else { s6 = 1; st6 = 'fail'; det6 = `Insider holding ${ih.toFixed(1)}% — Very low insider stake`; }
+  }
+  checks.push({ name: 'Promoter/Insider Faith', score: s6, max: 8, status: st6, detail: det6 });
+  totalScore += s6;
+
+  // 7. Promoter Pledge (8 pts) — not available from Yahoo, note it
+  checks.push({ name: 'Promoter Pledge', score: 0, max: 8, status: 'na', detail: 'Not available from Yahoo Finance. Check NSE/BSE for promoter pledging data.' });
+
+  // 8. ROE Quality (8 pts)
+  const roe = d.returnOnEquity;
+  let s8 = 0, st8 = 'na', det8 = 'Insufficient data';
+  if (roe != null) {
+    if (roe > 20) { s8 = 8; st8 = 'pass'; det8 = `ROE ${roe.toFixed(1)}% — Excellent capital efficiency`; }
+    else if (roe > 15) { s8 = 6; st8 = 'pass'; det8 = `ROE ${roe.toFixed(1)}% — Good returns`; }
+    else if (roe > 10) { s8 = 4; st8 = 'warn'; det8 = `ROE ${roe.toFixed(1)}% — Average`; }
+    else if (roe > 0) { s8 = 2; st8 = 'warn'; det8 = `ROE ${roe.toFixed(1)}% — Below average returns`; }
+    else { s8 = 0; st8 = 'fail'; det8 = `ROE ${roe.toFixed(1)}% — Destroying shareholder value!`; }
+  }
+  checks.push({ name: 'ROE Quality', score: s8, max: 8, status: st8, detail: det8 });
+  totalScore += s8;
+
+  // 9. Auditor Trust (5 pts) — not available, note it
+  checks.push({ name: 'Auditor Trust', score: 0, max: 5, status: 'na', detail: 'Auditor change history not available. Check annual reports manually.' });
+
+  // 10. Narrative Drift (5 pts) — basic check from description
+  checks.push({ name: 'Narrative Drift', score: 0, max: 5, status: 'na', detail: 'Business description change history not trackable via API. Read annual reports for narrative consistency.' });
+
+  // 11. Volume Sanity (6 pts)
+  const vs = d.volumeSpike;
+  let s11 = 0, st11 = 'na', det11 = 'Insufficient volume data';
+  if (vs != null) {
+    if (vs < 1.5) { s11 = 6; st11 = 'pass'; det11 = `Volume ratio ${vs.toFixed(2)}x — Normal trading volume`; }
+    else if (vs < 3) { s11 = 4; st11 = 'warn'; det11 = `Volume ratio ${vs.toFixed(2)}x — Elevated volume, monitor`; }
+    else if (vs < 5) { s11 = 2; st11 = 'warn'; det11 = `Volume ratio ${vs.toFixed(2)}x — Unusual volume spike!`; }
+    else { s11 = 0; st11 = 'fail'; det11 = `Volume ratio ${vs.toFixed(2)}x — Massive volume spike! Possible manipulation`; }
+  }
+  checks.push({ name: 'Volume Sanity', score: s11, max: 6, status: st11, detail: det11 });
+  totalScore += s11;
+
+  // 12. Insider Activity (6 pts) — limited from Yahoo
+  checks.push({ name: 'Insider Activity', score: 0, max: 6, status: 'na', detail: 'Recent insider trade data not available. Check BSE bulk/block deals.' });
+
+  // Adjust total for N/A items — score out of available points
+  const availableMax = checks.filter(c => c.status !== 'na').reduce((a, c) => a + c.max, 0);
+  const rawScore = totalScore;
+  const normalizedScore = availableMax > 0 ? Math.round((rawScore / availableMax) * 100) : 0;
+
+  return {
+    score: normalizedScore,
+    rawScore,
+    availableMax,
+    totalMax,
+    checks,
+    grade: getGrade(normalizedScore)
+  };
+}
+
+function getGrade(score) {
+  if (score >= 90) return { letter: 'A+', label: 'Excellent', color: '#10b981' };
+  if (score >= 80) return { letter: 'A', label: 'Very Good', color: '#22c55e' };
+  if (score >= 70) return { letter: 'B+', label: 'Good', color: '#4ade80' };
+  if (score >= 60) return { letter: 'B', label: 'Decent', color: '#84cc16' };
+  if (score >= 50) return { letter: 'C', label: 'Average', color: '#eab308' };
+  if (score >= 40) return { letter: 'D', label: 'Below Average', color: '#f97316' };
+  if (score >= 30) return { letter: 'E', label: 'Poor', color: '#ef4444' };
+  return { letter: 'F', label: 'Avoid', color: '#dc2626' };
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RENDER FUNCTIONS
+   ═══════════════════════════════════════════════════════════════ */
+function renderStockInfoBar(d) {
+  const change = d.currentPrice && d.previousClose ? ((d.currentPrice - d.previousClose) / d.previousClose * 100) : null;
+  const changeClass = change > 0 ? 'up' : change < 0 ? 'down' : '';
+  document.getElementById('stock-info-bar').innerHTML = `
+    <span class="sib-name">${d.name || d.symbol}</span>
+    <span class="sib-sym">${d.symbol} · ${d.exchange || ''}</span>
+    <span class="sib-detail">${d.sector ? d.sector + ' · ' + (d.industry || '') : ''}</span>
+    <span class="sib-price">₹${fmtNum(d.currentPrice)}</span>
+    ${change != null ? `<span class="sib-change ${changeClass}">${change > 0 ? '+' : ''}${change.toFixed(2)}%</span>` : ''}
+    <span class="sib-detail">MCap: ₹${fmtCrJS(d.marketCap)}</span>
+  `;
+}
+
+function renderScore(r) {
+  const ring = document.getElementById('score-ring-fg');
+  const offset = CIRC - (CIRC * r.score / 100);
+  ring.style.strokeDashoffset = offset;
+  ring.style.stroke = r.grade.color;
+
+  document.getElementById('score-num').textContent = r.score;
+  document.getElementById('score-num').style.color = r.grade.color;
+  document.getElementById('score-grade').textContent = r.grade.letter;
+  document.getElementById('score-grade').style.color = r.grade.color;
+  document.getElementById('score-label').textContent = r.grade.label;
+}
+
+function renderMetrics(d) {
+  const m = [
+    { label: 'Market Cap', value: '₹' + fmtCrJS(d.marketCap) },
+    { label: 'P/E Ratio', value: fmtNum(d.pe), sub: d.forwardPE ? 'Fwd: ' + fmtNum(d.forwardPE) : null },
+    { label: 'P/B Ratio', value: fmtNum(d.pb) },
+    { label: 'Revenue', value: '₹' + fmtCrJS(d.totalRevenue), sub: d.revenueGrowth != null ? (d.revenueGrowth > 0 ? '↑' : '↓') + Math.abs(d.revenueGrowth).toFixed(1) + '% YoY' : null, subClass: d.revenueGrowth > 0 ? 'up' : 'down' },
+    { label: 'Operating Margin', value: d.operatingMargin != null ? d.operatingMargin.toFixed(1) + '%' : 'N/A' },
+    { label: 'ROE', value: d.returnOnEquity != null ? d.returnOnEquity.toFixed(1) + '%' : 'N/A' },
+    { label: 'Debt/Equity', value: d.debtToEquity != null ? d.debtToEquity.toFixed(2) : 'N/A' },
+    { label: 'Free Cash Flow', value: '₹' + fmtCrJS(d.freeCashFlow) },
+    { label: '52W Range', value: '₹' + fmtNum(d.fiftyTwoWeekLow) + ' – ₹' + fmtNum(d.fiftyTwoWeekHigh) },
+    { label: 'Dividend Yield', value: d.dividendYield != null ? d.dividendYield.toFixed(2) + '%' : 'N/A' },
+    { label: 'Insider Holding', value: d.insiderHolding != null ? d.insiderHolding.toFixed(1) + '%' : 'N/A' },
+    { label: 'Employees', value: d.employees ? d.employees.toLocaleString('en-IN') : 'N/A' },
+  ];
+
+  document.getElementById('metrics-grid').innerHTML = m.map(x => `
+    <div class="metric-card">
+      <div class="metric-label">${x.label}</div>
+      <div class="metric-value">${x.value}</div>
+      ${x.sub ? `<div class="metric-sub ${x.subClass || 'neutral'}">${x.sub}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+function renderFlags(checks) {
+  const statusIcon = { pass: '✅', fail: '🔴', warn: '🟡', na: '⬜' };
+  document.getElementById('flags-grid').innerHTML = checks.map(c => `
+    <div class="flag-item ${c.status}">
+      <span class="flag-icon">${statusIcon[c.status]}</span>
+      <div class="flag-text">
+        <div class="flag-name">${c.name} <span style="color:var(--text-muted);font-weight:400;font-size:.8rem">(${c.score}/${c.max})</span></div>
+        <div class="flag-detail">${c.detail}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CHARTS (Chart.js)
+   ═══════════════════════════════════════════════════════════════ */
+function renderCharts(d) {
+  // Destroy old charts
+  Object.values(chartInstances).forEach(c => c.destroy());
+  chartInstances = {};
+
+  const chartDefaults = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { labels: { color: '#94a3b8', font: { size: 11 } } } },
+    scales: {
+      x: { ticks: { color: '#5a6a80', font: { size: 10 } }, grid: { color: 'rgba(30,43,64,.5)' } },
+      y: { ticks: { color: '#5a6a80', font: { size: 10 } }, grid: { color: 'rgba(30,43,64,.5)' } }
+    }
+  };
+
+  // 1. Revenue & Profit
+  const income = d.financials?.income || [];
+  if (income.length) {
+    const labels = income.map(y => y.date ? y.date.substring(0, 4) : '?');
+    chartInstances.revenue = new Chart(document.getElementById('chart-revenue'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Revenue', data: income.map(y => y.revenue ? y.revenue / 1e7 : 0), backgroundColor: '#3b82f680', borderColor: '#3b82f6', borderWidth: 1 },
+          { label: 'Net Income', data: income.map(y => y.netIncome ? y.netIncome / 1e7 : 0), backgroundColor: '#10b98180', borderColor: '#10b981', borderWidth: 1 }
+        ]
+      },
+      options: { ...chartDefaults, plugins: { ...chartDefaults.plugins, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ₹' + ctx.parsed.y.toFixed(0) + ' Cr' } } } }
+    });
+  }
+
+  // 2. Cash Flow
+  const cf = d.financials?.cashFlow || [];
+  if (cf.length) {
+    const labels = cf.map(y => y.date ? y.date.substring(0, 4) : '?');
+    chartInstances.cashflow = new Chart(document.getElementById('chart-cashflow'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Operating CF', data: cf.map(y => y.operatingCashFlow ? y.operatingCashFlow / 1e7 : 0), backgroundColor: '#3b82f680', borderColor: '#3b82f6', borderWidth: 1 },
+          { label: 'Free CF', data: cf.map(y => y.freeCashFlow ? y.freeCashFlow / 1e7 : 0), backgroundColor: '#f59e0b80', borderColor: '#f59e0b', borderWidth: 1 }
+        ]
+      },
+      options: { ...chartDefaults, plugins: { ...chartDefaults.plugins, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ₹' + ctx.parsed.y.toFixed(0) + ' Cr' } } } }
+    });
+  }
+
+  // 3. Stock Price (5 years)
+  const ph = d.priceHistory || [];
+  if (ph.length) {
+    const labels = ph.map(p => p.date ? p.date.substring(0, 7) : '?');
+    chartInstances.price = new Chart(document.getElementById('chart-price'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Price (₹)',
+          data: ph.map(p => p.close),
+          borderColor: '#3b82f6',
+          backgroundColor: 'rgba(59,130,246,.1)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 0,
+          borderWidth: 2
+        }]
+      },
+      options: chartDefaults
+    });
+  }
+
+  // 4. Operating Margin Trend
+  const margins = d.operatingMargins || [];
+  if (margins.length) {
+    const labels = margins.map(m => m.date ? m.date.substring(0, 4) : '?');
+    chartInstances.margin = new Chart(document.getElementById('chart-margin'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'OPM %',
+          data: margins.map(m => m.margin),
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16,185,129,.1)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 4,
+          pointBackgroundColor: '#10b981',
+          borderWidth: 2
+        }]
+      },
+      options: chartDefaults
+    });
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   AI VERDICT
+   ═══════════════════════════════════════════════════════════════ */
+async function fetchAIVerdict(d) {
+  const box = document.getElementById('verdict-box');
+  box.innerHTML = '<div class="verdict-loading"><div class="mini-spinner"></div> Generating AI analysis using Rohit\'s framework...</div>';
+
+  try {
+    const apiKey = localStorage.getItem('ss_gemini_key') || '';
+    const modelPreference = localStorage.getItem('ss_model_pref') || 'auto';
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ stockData: d, mode: 'quality', apiKey, modelPreference })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    box.innerHTML = markdownToHTML(data.analysis);
+  } catch (err) {
+    box.innerHTML = `<div style="color:var(--amber)">⚠️ AI analysis note: ${err.message}. The quality score above is still valid — it's computed from raw financial data.</div>`;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   NEWS
+   ═══════════════════════════════════════════════════════════════ */
+async function fetchNews(query) {
+  const list = document.getElementById('news-list');
+  list.innerHTML = '<div style="color:var(--text-muted);font-size:.9rem;padding:12px">Loading news...</div>';
+
+  try {
+    const res = await fetch('/api/news?q=' + encodeURIComponent(query));
+    const data = await res.json();
+    if (!data.articles?.length) { list.innerHTML = '<div style="color:var(--text-muted);padding:12px">No recent news found.</div>'; return; }
+
+    list.innerHTML = data.articles.map(a => `
+      <a href="${a.link}" target="_blank" class="news-item" style="text-decoration:none;color:inherit">
+        <span class="news-title">${a.title}</span>
+        <div class="news-meta">
+          <span class="news-source">${a.source}</span>
+          <span class="news-date">${a.date ? timeAgo(a.date) : ''}</span>
+          <span class="news-sentiment ${a.sentiment}">${a.sentiment}</span>
+        </div>
+      </a>
+    `).join('');
+  } catch (e) {
+    list.innerHTML = '<div style="color:var(--text-muted);padding:12px">Failed to load news.</div>';
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RUMOR BUSTER
+   ═══════════════════════════════════════════════════════════════ */
+async function handleBustRumor() {
+  const rumor = document.getElementById('rumor-text').value.trim();
+  const ticker = document.getElementById('rumor-ticker').value.trim();
+  if (!rumor) { alert('Please enter a rumor or claim to bust.'); return; }
+
+  const btn = document.getElementById('rumor-btn');
+  const resultBox = document.getElementById('rumor-result-box');
+  const result = document.getElementById('rumor-result');
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Investigating...';
+  resultBox.style.display = 'block';
+  result.innerHTML = '<div class="verdict-loading"><div class="mini-spinner"></div> Fetching data and analyzing the claim...</div>';
+
+  let stockData = null;
+
+  // If ticker provided, fetch its data first
+  if (ticker) {
+    try {
+      const sym = ticker.toUpperCase().includes('.') ? ticker.toUpperCase() : ticker.toUpperCase() + '.NS';
+      const res = await fetch('/api/stock?action=quote&symbol=' + encodeURIComponent(sym));
+      if (res.ok) stockData = await res.json();
+    } catch (e) {
+      console.warn('Could not fetch stock data for rumor:', e);
+    }
+  }
+
+  try {
+    const apiKey = localStorage.getItem('ss_gemini_key') || '';
+    const modelPreference = localStorage.getItem('ss_model_pref') || 'auto';
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ stockData, mode: 'rumor', query: rumor, apiKey, modelPreference })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    result.innerHTML = markdownToHTML(data.analysis);
+  } catch (err) {
+    result.innerHTML = `<div style="color:var(--red)">❌ Failed to analyze: ${err.message}</div>`;
+  }
+
+  btn.disabled = false;
+  btn.textContent = '🔍 Bust This Rumor';
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CHAT
+   ═══════════════════════════════════════════════════════════════ */
+const chatInput = document.getElementById('chat-input');
+const chatMsgs = document.getElementById('chat-messages');
+
+chatInput?.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) handleChatSend(); });
+
+async function handleChatSend() {
+  const msg = chatInput.value.trim();
+  if (!msg) return;
+
+  chatInput.value = '';
+  appendChatMsg('user', msg);
+  chatHistory.push({ role: 'user', content: msg });
+
+  const sendBtn = document.getElementById('chat-send-btn');
+  sendBtn.disabled = true;
+
+  // Show typing indicator
+  const typingId = 'typing-' + Date.now();
+  appendChatMsg('assistant', '<div class="verdict-loading"><div class="mini-spinner"></div> Thinking...</div>', typingId);
+
+  try {
+    const apiKey = localStorage.getItem('ss_gemini_key') || '';
+    const modelPreference = localStorage.getItem('ss_model_pref') || 'auto';
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        stockData: currentStockData,
+        mode: 'chat',
+        query: msg,
+        chatHistory: chatHistory.slice(-10),
+        apiKey,
+        modelPreference
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    // Replace typing indicator
+    const typingEl = document.getElementById(typingId);
+    if (typingEl) typingEl.innerHTML = markdownToHTML(data.analysis);
+
+    chatHistory.push({ role: 'assistant', content: data.analysis });
+  } catch (err) {
+    const typingEl = document.getElementById(typingId);
+    if (typingEl) typingEl.innerHTML = `<span style="color:var(--red)">❌ ${err.message}</span>`;
+  }
+
+  sendBtn.disabled = false;
+  chatInput.focus();
+}
+
+function appendChatMsg(role, html, id) {
+  const div = document.createElement('div');
+  div.className = 'chat-msg ' + role;
+  if (id) div.id = id;
+  div.innerHTML = html;
+  chatMsgs.appendChild(div);
+  chatMsgs.scrollTop = chatMsgs.scrollHeight;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SETTINGS
+   ═══════════════════════════════════════════════════════════════ */
+function toggleSettings() {
+  const modal = document.getElementById('settings-modal');
+  modal.classList.toggle('active');
+  if (modal.classList.contains('active')) {
+    document.getElementById('setting-api-key').value = localStorage.getItem('ss_gemini_key') || '';
+    document.getElementById('setting-model-pref').value = localStorage.getItem('ss_model_pref') || 'auto';
+  }
+}
+
+function saveSettings() {
+  const key = document.getElementById('setting-api-key').value.trim();
+  const pref = document.getElementById('setting-model-pref').value;
+  if (key) localStorage.setItem('ss_gemini_key', key);
+  else localStorage.removeItem('ss_gemini_key');
+  localStorage.setItem('ss_model_pref', pref);
+  toggleSettings();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   UTILITIES
+   ═══════════════════════════════════════════════════════════════ */
+function fmtNum(val) {
+  if (val == null || isNaN(val)) return 'N/A';
+  return Number(Number(val).toFixed(2)).toLocaleString('en-IN');
+}
+
+function fmtCrJS(val) {
+  if (val == null || isNaN(val)) return 'N/A';
+  const num = Number(val);
+  const cr = num / 1e7;
+  if (Math.abs(cr) >= 1) return cr.toFixed(1) + ' Cr';
+  const lakh = num / 1e5;
+  if (Math.abs(lakh) >= 1) return lakh.toFixed(1) + ' L';
+  return fmtNum(val);
+}
+
+function timeAgo(dateStr) {
+  const d = new Date(dateStr);
+  const now = new Date();
+  const diff = (now - d) / 1000;
+  if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+  if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+  if (diff < 604800) return Math.floor(diff / 86400) + 'd ago';
+  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+}
+
+// Simple markdown → HTML converter
+function markdownToHTML(md) {
+  if (!md) return '';
+  let html = md
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    // Headers
+    .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+    // Bold & italic
+    .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    // Code
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    // Unordered lists
+    .replace(/^\* (.+)$/gm, '<li>$1</li>')
+    .replace(/^- (.+)$/gm, '<li>$1</li>')
+    // Ordered lists
+    .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
+    // Horizontal rules
+    .replace(/^---$/gm, '<hr>')
+    // Line breaks
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/\n/g, '<br>');
+
+  // Wrap consecutive <li> in <ul>
+  html = html.replace(/(<li>.*?<\/li>(?:<br>)?)+/gs, match => '<ul>' + match.replace(/<br>/g, '') + '</ul>');
+
+  return '<p>' + html + '</p>';
+}
+</script>
+</body>
+</html>
