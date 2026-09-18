@@ -333,6 +333,12 @@ input,textarea{font-family:var(--font);outline:none}
 }
 .rumor-btn:hover{background:#dc2626}
 .rumor-btn:disabled{opacity:.5;cursor:not-allowed}
+.rumor-chip{
+  background:var(--bg-input);border:1px solid var(--border);border-radius:14px;
+  padding:4px 10px;font-size:.78rem;color:var(--text-secondary);transition:all .15s;
+  cursor:pointer;
+}
+.rumor-chip:hover{background:var(--bg-card-hover);color:var(--text-primary);border-color:var(--accent)}
 .rumor-result{
   background:var(--bg-card);border:1px solid var(--border);
   border-radius:var(--radius);padding:20px;
@@ -563,6 +569,12 @@ input,textarea{font-family:var(--font);outline:none}
       <h3>🔍 Rumor Buster</h3>
       <p>Enter a market rumor, tip, or claim. StockSight will actively try to disprove it using hard financial data — exactly how Rohit would.</p>
       <textarea id="rumor-text" placeholder="e.g. 'My friend told me ABC Pharma is getting a ₹5000 Cr government contract and the stock will 3x'"></textarea>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 16px">
+        <span style="font-size:0.75rem;color:var(--text-muted);display:flex;align-items:center">Try examples:</span>
+        <button type="button" class="rumor-chip" onclick="setRumorPrompt('i was told pinelabs gonna shoot from 2 diff sources. what are the chances thats true', '')">💡 Pine Labs 2-Source Tip</button>
+        <button type="button" class="rumor-chip" onclick="setRumorPrompt('Heard from a WhatsApp group this company is getting a ₹5,000 Cr order and will 3x', '')">💡 ₹5,000 Cr Order Hype</button>
+        <button type="button" class="rumor-chip" onclick="setRumorPrompt('Big MNC takeover buyout at ₹450 per share coming soon', '')">💡 Takeover Buyout Rumor</button>
+      </div>
       <div class="rumor-row">
         <input id="rumor-ticker" placeholder="Stock ticker (optional, e.g. RELIANCE)">
         <button class="rumor-btn" id="rumor-btn" onclick="handleBustRumor()">🔍 Bust This Rumor</button>
@@ -1196,6 +1208,12 @@ async function fetchNews(query) {
 /* ═══════════════════════════════════════════════════════════════
    RUMOR BUSTER
    ═══════════════════════════════════════════════════════════════ */
+function setRumorPrompt(text, ticker) {
+  document.getElementById('rumor-text').value = text;
+  document.getElementById('rumor-ticker').value = ticker || '';
+  handleBustRumor();
+}
+
 async function handleBustRumor() {
   const rumor = document.getElementById('rumor-text').value.trim();
   const ticker = document.getElementById('rumor-ticker').value.trim();
