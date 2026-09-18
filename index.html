@@ -2537,14 +2537,33 @@ async function handleBustRumor() {
   result.innerHTML = '<div class="verdict-loading"><div class="mini-spinner"></div> Interrogating exchange filings, capacity math & unit margins...</div>';
 
   let stockData = null;
-  if (ticker) {
-    try {
-      const sym = ticker.toUpperCase().includes('.') ? ticker.toUpperCase() : ticker.toUpperCase() + '.NS';
-      const res = await fetch('/api/stock?action=quote&symbol=' + encodeURIComponent(sym));
-      if (res.ok) stockData = await res.json();
-    } catch (e) {
-      console.warn('Could not fetch stock data for rumor:', e);
+  try {
+    // 1. If ticker is an exact symbol with dot (e.g. BELRISE.NS)
+    if (ticker && ticker.includes('.')) {
+      const res = await fetch('/api/stock?action=quote&symbol=' + encodeURIComponent(ticker.toUpperCase().trim()));
+      if (res.ok) {
+        const d = await res.json();
+        if (!d.error) stockData = d;
+      }
     }
+    // 2. Search Yahoo Finance using ticker or rumor query to resolve company
+    if (!stockData) {
+      const searchQuery = ticker || rumor;
+      const searchRes = await fetch('/api/stock?action=search&q=' + encodeURIComponent(searchQuery));
+      if (searchRes.ok) {
+        const sData = await searchRes.json();
+        if (sData.quotes && sData.quotes.length > 0) {
+          const resolvedSym = sData.quotes[0].symbol;
+          const qRes = await fetch('/api/stock?action=quote&symbol=' + encodeURIComponent(resolvedSym));
+          if (qRes.ok) {
+            const d = await qRes.json();
+            if (!d.error) stockData = d;
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('Could not resolve stock data for rumor:', e);
   }
 
   try {

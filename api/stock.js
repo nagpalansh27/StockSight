@@ -61,15 +61,15 @@ module.exports = async function handler(req, res) {
 };
 
 // ─── Search ──────────────────────────────────────────────────────────
-async function handleSearch(query, res) {
-  if (!query || query.length < 1) return res.json({ quotes: [] });
+async function searchStocks(query) {
+  if (!query || query.length < 1) return [];
 
   const url = `https://query2.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(query)}&quotesCount=12&newsCount=0`;
   const response = await fetch(url, { headers: { 'User-Agent': USER_AGENT } });
-  if (!response.ok) throw new Error(`Search failed: HTTP ${response.status}`);
+  if (!response.ok) return [];
 
   const data = await response.json();
-  const quotes = (data.quotes || [])
+  return (data.quotes || [])
     .filter(q => ['NSI', 'NSE', 'BSE', 'BOM', 'NMS', 'NYQ', 'NGM', 'PCX'].includes(q.exchange))
     .map(q => ({
       symbol: q.symbol,
@@ -77,13 +77,16 @@ async function handleSearch(query, res) {
       exchange: q.exchange,
       type: q.quoteType
     }));
+}
 
+async function handleSearch(query, res) {
+  const quotes = await searchStocks(query);
   return res.json({ quotes });
 }
 
 // ─── Full Quote ──────────────────────────────────────────────────────
-async function handleQuote(symbol, res) {
-  if (!symbol) return res.status(400).json({ error: 'Missing symbol parameter' });
+async function fetchStockData(symbol) {
+  if (!symbol) throw new Error('Missing symbol parameter');
 
   let ticker = symbol.toUpperCase().trim();
   if (!ticker.includes('.') && !ticker.includes(':')) {
@@ -146,7 +149,11 @@ async function handleQuote(symbol, res) {
     console.warn('Chart 3m fetch failed:', e.message);
   }
 
-  const processed = processStockData(s, chart5y, chart3m, ticker);
+  return processStockData(s, chart5y, chart3m, ticker);
+}
+
+async function handleQuote(symbol, res) {
+  const processed = await fetchStockData(symbol);
   return res.json(processed);
 }
 
@@ -382,3 +389,6 @@ function processStockData(s, chart5y, chart3m, ticker) {
     recentVolume
   };
 }
+
+module.exports.fetchStockData = fetchStockData;
+module.exports.searchStocks = searchStocks;
