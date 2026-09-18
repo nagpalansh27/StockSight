@@ -342,8 +342,26 @@ input,textarea{font-family:var(--font);outline:none}
 .rumor-chip:hover{background:var(--bg-card-hover);color:var(--text-primary);border-color:var(--accent)}
 .rumor-result{
   background:var(--bg-card);border:1px solid var(--border);
-  border-radius:var(--radius);padding:20px;
-  font-size:.92rem;line-height:1.7;color:var(--text-secondary);
+  border-radius:var(--radius);padding:24px;
+  font-size:.92rem;line-height:1.75;color:var(--text-secondary);
+}
+.rumor-result h1, .rumor-result h2, .rumor-result h3, .rumor-result h4,
+.verdict-box h1, .verdict-box h2, .verdict-box h3, .verdict-box h4 {
+  color:var(--text-primary);margin:16px 0 8px;font-weight:700;line-height:1.35;
+}
+.rumor-result h1, .verdict-box h1 { font-size:1.25rem; }
+.rumor-result h2, .verdict-box h2 { font-size:1.15rem; }
+.rumor-result h3, .verdict-box h3 { font-size:1.02rem; }
+.rumor-result h4, .verdict-box h4 { font-size:0.92rem; }
+.rumor-result p, .verdict-box p { margin:8px 0; }
+.rumor-result ul, .rumor-result ol, .verdict-box ul, .verdict-box ol {
+  padding-left:22px;margin:8px 0 14px;
+}
+.rumor-result li, .verdict-box li { margin-bottom:6px; }
+.rumor-result strong, .verdict-box strong { color:var(--text-primary); }
+.rumor-result code, .verdict-box code {
+  background:var(--bg-primary);border:1px solid var(--border);padding:2px 6px;
+  border-radius:4px;font-family:var(--mono);font-size:0.85em;color:#93c5fd;
 }
 .score-callout{
   padding:16px 20px;border-radius:var(--radius-sm);margin:16px 0 20px;
@@ -368,7 +386,8 @@ input,textarea{font-family:var(--font);outline:none}
 }
 .rumor-result a, .verdict-box a, .chat-msg a{
   color:#60a5fa !important;text-decoration:underline !important;text-underline-offset:3px;
-  font-weight:500;word-break:break-word;
+  font-weight:600;word-break:break-word;cursor:pointer !important;
+  display:inline;transition:color .15s;
 }
 .rumor-result a:hover, .verdict-box a:hover, .chat-msg a:hover{color:#93c5fd !important}
 
@@ -517,7 +536,7 @@ input,textarea{font-family:var(--font);outline:none}
     <div id="quality-empty" class="empty-state">
       <div class="es-icon">📊</div>
       <h2>Analyze Any Stock</h2>
-      <p>Enter a stock ticker or company name above to get a comprehensive fact-based quality score using Rohit's 12-point checklist.</p>
+      <p>Enter a stock ticker or company name above to get a comprehensive fact-based quality score using StockSight's institutional 12-point checklist.</p>
     </div>
 
     <!-- Loading -->
@@ -566,7 +585,7 @@ input,textarea{font-family:var(--font);outline:none}
 
       <!-- AI Verdict -->
       <div class="verdict-section">
-        <h3>🤖 AI Analysis (Rohit's Framework)</h3>
+        <h3>🤖 AI Quality Analysis</h3>
         <div class="verdict-box" id="verdict-box">
           <div class="verdict-loading">
             <div class="mini-spinner"></div>
@@ -589,7 +608,7 @@ input,textarea{font-family:var(--font);outline:none}
   <div class="mode-view" id="view-rumor">
     <div class="rumor-input-box">
       <h3>🔍 Rumor Buster</h3>
-      <p>Enter a market rumor, tip, or claim. StockSight will actively try to disprove it using hard financial data — exactly how Rohit would.</p>
+      <p>Enter a market rumor, tip, or claim. StockSight will actively evaluate it using hard financial data and exchange disclosures.</p>
       <textarea id="rumor-text" placeholder="e.g. 'My friend told me ABC Pharma is getting a ₹5000 Cr government contract and the stock will 3x'"></textarea>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 16px">
         <span style="font-size:0.75rem;color:var(--text-muted);display:flex;align-items:center">Try examples:</span>
@@ -613,6 +632,13 @@ input,textarea{font-family:var(--font);outline:none}
       <div class="chat-header">
         <span class="dot"></span>
         StockSight AI — Ask anything about stocks. All answers are fact-based, no speculation.
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;padding:8px 16px;border-bottom:1px solid var(--border);background:var(--bg-primary)">
+        <span style="font-size:0.75rem;color:var(--text-muted);display:flex;align-items:center">Quick queries:</span>
+        <button type="button" class="rumor-chip" onclick="setChatPrompt('Is Pine Labs a good stock to put money in pre-IPO?')">💡 Pine Labs Pre-IPO Analysis</button>
+        <button type="button" class="rumor-chip" onclick="setChatPrompt('Why is Bharat Electronics (BEL) considered a top quality stock?')">💡 BEL Quality Analysis</button>
+        <button type="button" class="rumor-chip" onclick="setChatPrompt('Explain Cochin Shipyard margin accretion math')">💡 Cochin Shipyard Margin Math</button>
+        <button type="button" class="rumor-chip" onclick="setChatPrompt('Compare Zomato vs Swiggy unit economics and operating cash flows')">💡 Zomato vs Swiggy CFO</button>
       </div>
       <div class="chat-messages" id="chat-messages">
         <div class="chat-msg system">Type a message below to start. You can ask about any stock, compare companies, or question market narratives.</div>
@@ -849,7 +875,7 @@ async function handleAnalyze() {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   SCORING ENGINE — Rohit's 12-Point Checklist
+   SCORING ENGINE — Institutional 12-Point Checklist
    ═══════════════════════════════════════════════════════════════ */
 function calculateQualityScore(d) {
   const checks = [];
@@ -1182,7 +1208,7 @@ function renderCharts(d) {
    ═══════════════════════════════════════════════════════════════ */
 async function fetchAIVerdict(d) {
   const box = document.getElementById('verdict-box');
-  box.innerHTML = '<div class="verdict-loading"><div class="mini-spinner"></div> Generating AI analysis using Rohit\'s framework...</div>';
+  box.innerHTML = '<div class="verdict-loading"><div class="mini-spinner"></div> Generating institutional AI analysis...</div>';
 
   try {
     const apiKey = localStorage.getItem('ss_gemini_key') || '';
@@ -1345,6 +1371,25 @@ function appendChatMsg(role, html, id) {
   chatMsgs.appendChild(div);
   chatMsgs.scrollTop = chatMsgs.scrollHeight;
 }
+
+function setChatPrompt(prompt) {
+  const input = document.getElementById('chat-input');
+  if (!input) return;
+  input.value = prompt;
+  handleChatSend();
+}
+
+// Global click handler guaranteeing external links in analysis cards open reliably in new tabs
+document.addEventListener('click', function(e) {
+  const link = e.target.closest('a');
+  if (link && link.getAttribute('href')) {
+    const href = link.getAttribute('href');
+    if (href.startsWith('http://') || href.startsWith('https://')) {
+      e.preventDefault();
+      window.open(href, '_blank', 'noopener,noreferrer');
+    }
+  }
+});
 
 /* ═══════════════════════════════════════════════════════════════
    SETTINGS

@@ -1,11 +1,11 @@
 # StockSight — Project Rules
 
 ## What is this?
-AI-powered, fact-based stock quality analyzer for Indian stocks. Built to counter rumor-driven investing with hard data and Rohit's analytical framework.
+AI-powered, fact-based stock quality analyzer for Indian stocks. Built to counter rumor-driven investing with hard data and an institutional quantitative framework.
 
 ## Quick Reference
 - **Repo**: `C:\Users\anshn\Documents\GitHub\StockSight\` → GitHub `nagpalansh27/StockSight`
-- **Live**: TBD (Vercel)
+- **Live**: https://stocksight-six.vercel.app/
 - **Password**: `ansh` (SHA-256 hash gate with localStorage)
 - **Always auto-push** using PowerShell CredRead from Windows Credential Manager
 
@@ -19,7 +19,7 @@ AI-powered, fact-based stock quality analyzer for Indian stocks. Built to counte
 ## Environment Variables (Vercel)
 - `GEMINI_API_KEY` — Google Gemini API key for AI analysis
 
-## Core Philosophy (Rohit's Framework)
+## Core Philosophy (Institutional Framework)
 1. **Trust Numbers, Not Narratives** — every claim must cite a number
 2. **Be Skeptical by Default** — if it sounds too good, disprove it
 3. **12-Point Quality Checklist** — revenue, profit, cash flow, valuation, debt, promoter, ROE, auditor, narrative, volume, insider

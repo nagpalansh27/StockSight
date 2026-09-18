@@ -9,7 +9,7 @@ Inspired by real-world fundamental analysis and built to counter rumor-driven in
 ## 🎯 What It Does
 
 1. **📊 Stock Quality Score (0–100 & Letter Grade)**
-   - Runs stocks through **Rohit's 12-Point Quality Checklist**:
+   - Runs stocks through **StockSight's Institutional 12-Point Quality Checklist**:
      - Revenue Reality (Multi-year CAGR & YoY)
      - Profit Quality (Operating Profit Margins)
      - Cash Flow vs. Net Income verification
