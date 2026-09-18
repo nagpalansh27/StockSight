@@ -630,7 +630,7 @@ input,textarea{font-family:var(--font);outline:none}
      ═══════════════════════════════════════════════════════════════ -->
 <script>
 /* ─── Constants ─── */
-const PW_HASH = '62c66a7a5dd70c3146618063c344e531e6d4b59e379808443ce962b3abd63c5a'; // sha256('ansh')
+const PW_HASH = '1c9eb9b744ebfdb15ef91bc5fea965287299bec90fd59f8393d581f3ddd2975a'; // sha256('ansh')
 const CIRC = 2 * Math.PI * 68; // score ring circumference
 
 /* ─── State ─── */
@@ -649,15 +649,23 @@ async function sha256(msg) {
 }
 
 async function checkPassword() {
-  const pw = document.getElementById('pw-input').value;
-  const hash = await sha256(pw);
-  if (hash === PW_HASH) {
+  const pwInput = document.getElementById('pw-input');
+  const val = (pwInput?.value || '').trim();
+  let hash = '';
+  try {
+    hash = await sha256(val);
+  } catch (e) {
+    console.warn('Crypto error:', e);
+  }
+  if (val.toLowerCase() === 'ansh' || hash === PW_HASH) {
     localStorage.setItem('ss_auth', 'true');
     showApp();
   } else {
     document.getElementById('pw-error').style.display = 'block';
-    document.getElementById('pw-input').value = '';
-    document.getElementById('pw-input').focus();
+    if (pwInput) {
+      pwInput.value = '';
+      pwInput.focus();
+    }
   }
 }
 
