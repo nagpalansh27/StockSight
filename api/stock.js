@@ -269,7 +269,12 @@ function processStockData(s, chart5y, chart3m, ticker) {
       margin: (is.operatingIncome / is.revenue) * 100
     }));
 
-  const mCap = raw(pr.marketCap) || raw(sd.marketCap);
+  const curPrice = raw(fd.currentPrice) || raw(pr.regularMarketPrice);
+  const shares = raw(dk.sharesOutstanding) || raw(dk.impliedSharesOutstanding);
+  const mCap = raw(pr.marketCap) 
+    || raw(sd.marketCap) 
+    || (curPrice && shares ? curPrice * shares : null)
+    || raw(dk.enterpriseValue);
   const totRev = raw(fd.totalRevenue);
 
   const insiderHeld = raw(mh.insidersPercentHeld);
