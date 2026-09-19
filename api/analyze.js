@@ -47,10 +47,24 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
   try {
-    const { stockData, mode, query, chatHistory, apiKey: clientApiKey, modelPreference } = req.body;
+    const body = req.body || {};
+    let { stockData, mode, query, rumor, claim, text, prompt, stock, ticker, chatHistory, apiKey: clientApiKey, modelPreference } = body;
+    const effectiveQuery = query || rumor || claim || text || prompt || '';
+    if (!mode && (rumor || claim)) mode = 'rumor';
+
+    // If ticker string passed as stock or ticker without stockData, resolve it
+    if (!stockData && (typeof stock === 'string' || ticker)) {
+      const sym = (typeof stock === 'string' ? stock : ticker).trim();
+      try {
+        const found = await searchStocks(sym);
+        if (found && found.length > 0) {
+          stockData = await fetchStockData(found[0].symbol);
+        }
+      } catch (e) {}
+    }
 
     if (mode === 'rumor') {
-      const result = await handleDeepRumorInvestigation(stockData, query, clientApiKey, modelPreference);
+      const result = await handleDeepRumorInvestigation(stockData, effectiveQuery, clientApiKey, modelPreference);
       return res.json({ analysis: result, provider: 'forensic-investigator' });
     }
 
@@ -60,7 +74,7 @@ module.exports = async function handler(req, res) {
     }
 
     if (mode === 'chat') {
-      const result = await handleChat(stockData, query, chatHistory, clientApiKey, modelPreference);
+      const result = await handleChat(stockData, effectiveQuery, chatHistory, clientApiKey, modelPreference);
       return res.json({ analysis: result, provider: 'chat-engine' });
     }
 
